@@ -1,0 +1,72 @@
+# DevSecOps Practice Files
+
+# Security scan results
+*.sarif
+*.json
+*-report.html
+*-report.json
+trivy-results/
+semgrep-results/
+scan-results/
+
+# Secrets and credentials (NEVER commit these!)
+*.pem
+*.key
+*.p12
+*.pfx
+.env
+.env.*
+secrets/
+credentials/
+aws-credentials.txt
+gcp-credentials.json
+azure-credentials.json
+
+# Security tools cache
+.trivy/
+.semgrep/
+.snyk/
+
+# Logs
+*.log
+logs/
+audit-logs/
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+ENV/
+env/
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Docker
+.dockerignore
+
+# Test results
+test-results/
+coverage/
+.pytest_cache/

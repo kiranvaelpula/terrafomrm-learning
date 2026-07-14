@@ -1,0 +1,100 @@
+# MLOps Practice Files
+
+# MLflow
+mlruns/
+mlartifacts/
+.mlflow/
+
+# DVC
+.dvc/
+*.dvc
+
+# Jupyter Notebooks
+.ipynb_checkpoints/
+*.ipynb
+
+# Models
+models/
+*.pkl
+*.h5
+*.pt
+*.pth
+*.onnx
+*.pb
+saved_models/
+checkpoints/
+
+# Data
+data/
+datasets/
+*.csv
+*.parquet
+*.feather
+*.arrow
+
+# Logs
+logs/
+*.log
+tensorboard_logs/
+
+# Experiments
+experiments/
+runs/
+
+# Feature Store
+feast/
+.feast/
+
+# Monitoring
+monitoring/
+drift_reports/
+*.html
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+ENV/
+env/
+.Python
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+
+# Jupyter
+.ipynb_checkpoints
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary
+*.tmp
+.cache/
+
+# Credentials
+.env
+*.key
+credentials/
+
+# Large files
+*.zip
+*.tar.gz
+*.h5
+*.hdf5
+
+# Test results
+.pytest_cache/
+coverage/
+.coverage
+htmlcov/

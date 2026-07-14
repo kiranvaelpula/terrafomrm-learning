@@ -1,0 +1,85 @@
+# AIOps Practice Files
+
+# Logs
+logs/
+*.log
+log-analysis/
+parsed-logs/
+
+# Models
+models/
+*.pkl
+*.h5
+*.pt
+*.joblib
+
+# Data
+data/
+metrics/
+events/
+traces/
+timeseries/
+*.csv
+*.json
+*.parquet
+
+# Monitoring dashboards
+dashboards/
+*.dashboard
+
+# Grafana
+grafana/
+grafana-data/
+
+# Prometheus
+prometheus/
+prometheus-data/
+
+# Elasticsearch
+elasticsearch-data/
+.es/
+
+# Jupyter Notebooks
+.ipynb_checkpoints/
+notebooks/.ipynb_checkpoints/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+ENV/
+env/
+*.so
+
+# Results
+results/
+anomaly-results/
+predictions/
+reports/
+
+# Temporary
+*.tmp
+.cache/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Credentials
+.env
+credentials/
+*.key
+
+# Test
+.pytest_cache/
+coverage/
+
+# Docker volumes
+volumes/
