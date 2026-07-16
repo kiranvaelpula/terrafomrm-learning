@@ -1,0 +1,147 @@
+pipeline {
+    agent any
+    
+    environment {
+        DOCKER_IMAGE = 'simple-cicd-app'
+        DOCKER_TAG = "${BUILD_NUMBER}"
+        APP_VERSION = "1.0.${BUILD_NUMBER}"
+    }
+    
+    stages {
+        stage('Checkout') {
+            steps {
+                echo '📦 Checking out source code...'
+                checkout scm
+                sh 'git log -1 --pretty=format:"%h - %an: %s"'
+            }
+        }
+        
+        stage('Install Dependencies') {
+            steps {
+                echo '📚 Installing Python dependencies...'
+                sh '''
+                    cd app
+                    pip install -r requirements.txt
+                '''
+            }
+        }
+        
+        stage('Run Tests') {
+            steps {
+                echo '🧪 Running unit tests...'
+                sh '''
+                    cd app
+                    pytest test_app.py -v --junitxml=../test-results.xml
+                '''
+            }
+            post {
+                always {
+                    junit 'test-results.xml'
+                }
+            }
+        }
+        
+        stage('Build Docker Image') {
+            steps {
+                echo '🐳 Building Docker image...'
+                script {
+                    dockerImage = docker.build("${DOCKER_IMAGE}:${DOCKER_TAG}")
+                }
+            }
+        }
+        
+        stage('Test Docker Image') {
+            steps {
+                echo '✅ Testing Docker image...'
+                sh """
+                    docker run -d --name test-${BUILD_NUMBER} -p 5001:5000 \\
+                      -e APP_VERSION=${APP_VERSION} \\
+                      ${DOCKER_IMAGE}:${DOCKER_TAG}
+                    
+                    sleep 5
+                    
+                    echo "Testing health endpoint..."
+                    curl -f http://localhost:5001/health || exit 1
+                    
+                    echo "Testing home endpoint..."
+                    curl -f http://localhost:5001/ || exit 1
+                    
+                    docker stop test-${BUILD_NUMBER}
+                    docker rm test-${BUILD_NUMBER}
+                """
+            }
+        }
+        
+        stage('Tag Image') {
+            steps {
+                echo '🏷️ Tagging Docker image...'
+                sh """
+                    docker tag ${DOCKER_IMAGE}:${DOCKER_TAG} ${DOCKER_IMAGE}:latest
+                """
+            }
+        }
+        
+        stage('Deploy') {
+            steps {
+                echo '🚀 Deploying application...'
+                sh """
+                    # Stop and remove old container if exists
+                    docker stop simple-cicd-app || true
+                    docker rm simple-cicd-app || true
+                    
+                    # Run new container
+                    docker run -d \\
+                      --name simple-cicd-app \\
+                      -p 5000:5000 \\
+                      -e APP_VERSION=${APP_VERSION} \\
+                      --restart unless-stopped \\
+                      ${DOCKER_IMAGE}:${DOCKER_TAG}
+                """
+            }
+        }
+        
+        stage('Verify Deployment') {
+            steps {
+                echo '🔍 Verifying deployment...'
+                sh '''
+                    sleep 5
+                    
+                    echo "Checking health..."
+                    curl -f http://localhost:5000/health
+                    
+                    echo "Checking application..."
+                    curl -f http://localhost:5000/
+                    
+                    echo "✅ Deployment successful!"
+                '''
+            }
+        }
+    }
+    
+    post {
+        success {
+            echo '✅ Pipeline completed successfully!'
+            echo "🎉 Application Version: ${APP_VERSION}"
+            echo "🌐 Application running at: http://localhost:5000"
+        }
+        failure {
+            echo '❌ Pipeline failed!'
+            sh '''
+                docker stop simple-cicd-app || true
+                docker rm simple-cicd-app || true
+            '''
+        }
+        always {
+            echo '🧹 Cleaning up...'
+            sh """
+                # Clean up test containers
+                docker ps -a | grep test-${BUILD_NUMBER} | awk '{print \$1}' | xargs docker rm -f || true
+                
+                # Remove old images (keep last 5)
+                docker images ${DOCKER_IMAGE} --format '{{.Tag}}' | \\
+                  grep -v latest | sort -nr | tail -n +6 | \\
+                  xargs -I {} docker rmi ${DOCKER_IMAGE}:{} || true
+            """
+        }
+    }
+}

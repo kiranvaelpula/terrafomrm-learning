@@ -1,0 +1,16 @@
+﻿#!/usr/bin/env python3
+import sys
+from pathlib import Path
+
+def w(p, c):
+    Path(p).parent.mkdir(parents=True, exist_ok=True)
+    Path(p).write_text(c, encoding='utf-8')
+    print(f"✅ {Path(p).name:40} {len(c.splitlines()):5} lines")
+
+# Run generation
+print("🚀 Generating all Git content...\n")
+print(f"{'File':<40} Lines")
+print("=" * 50)
+
+# Content would go here - create the script
+print("Script template created")
