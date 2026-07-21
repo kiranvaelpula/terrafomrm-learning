@@ -10,8 +10,8 @@ terraform {
 }
 
 provider "aws" {
-  region  = "us-east-1"  # Change to your preferred region
-  profile = "terraform_practice"  # Use your SSO profile
+  region  = "us-east-1"
+  profile = "terraform_practice"
 }
 
 # This just checks if AWS connection works
