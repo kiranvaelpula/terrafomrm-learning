@@ -192,6 +192,47 @@ One physical DX connection, via a Transit VIF to the DX Gateway, reaches the Tra
 
 ---
 
+## CI/CD
+
+### Q2d: Walk me through building a CI/CD pipeline using AWS native services.
+
+**Answer:**
+
+**The AWS Code* toolchain:**
+```
+CodeCommit/GitHub → CodeBuild → Manual Approval → CodeDeploy/ECS
+     (Source)        (Build)      (Gate)          (Deploy)
+              orchestrated by CodePipeline
+```
+
+**Stage-by-stage:**
+1. **Source** — CodeCommit or GitHub triggers the pipeline on push to main
+2. **Build** — CodeBuild runs `buildspec.yml`: install deps, run tests, build Docker image, push to ECR
+3. **Approval** — Manual gate before production (specific approvers)
+4. **Deploy** — CodeDeploy or ECS action rolls out, ideally blue/green
+
+**buildspec.yml phases:** install → pre_build → build → post_build → artifacts
+
+**Key production practices:**
+- Secrets from SSM Parameter Store / Secrets Manager (never hardcoded)
+- Least-privilege IAM role per service
+- Blue/green or canary deployment (not all-at-once)
+- Automatic rollback tied to CloudWatch alarms
+- Encrypted artifact S3 bucket
+
+**Zero-downtime deployment (CodeDeploy blue/green):**
+```
+1. Provision green environment alongside blue
+2. Shift traffic gradually via ALB (canary/linear)
+3. Monitor CloudWatch alarms during shift
+4. Healthy → complete shift, tear down blue
+5. Alarm fires → automatic rollback to blue
+```
+
+**CodePipeline vs Jenkins:** CodePipeline when AWS-native with no servers to manage; Jenkins for maximum flexibility or hybrid/multi-cloud. Often blended — GitHub Actions for CI, CodeDeploy for AWS deployment.
+
+---
+
 ## Container Orchestration
 
 ### Q3: Compare ECS and EKS. When would you choose one over the other?
