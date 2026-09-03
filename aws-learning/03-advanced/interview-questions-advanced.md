@@ -5,7 +5,7 @@
 This document contains 25 advanced-level AWS interview questions covering advanced VPC, containers, security, cost optimization, multi-region, disaster recovery, and architecture design. These questions are for Solutions Architect, Senior DevOps Engineer, and Cloud Architect roles.
 
 **Topics Covered:**
-- Advanced networking (Transit Gateway, PrivateLink)
+- Advanced networking (Transit Gateway, PrivateLink, Site-to-Site VPN, Direct Connect)
 - Container orchestration (ECS, EKS)
 - Event-driven architectures
 - Security and compliance
@@ -126,6 +126,69 @@ aws ec2 create-vpc-endpoint \
   --service-name com.amazonaws.vpce.us-east-1.vpce-svc-12345678 \
   --vpc-endpoint-type Interface
 ```
+
+---
+
+### Q2b: When would you use Site-to-Site VPN vs Direct Connect for hybrid connectivity?
+
+**Answer:**
+
+| Factor | Site-to-Site VPN | Direct Connect |
+|--------|-----------------|----------------|
+| Medium | Public internet (IPsec encrypted) | Dedicated physical connection |
+| Bandwidth | Up to ~1.25 Gbps per tunnel | 50 Mbps – 100 Gbps |
+| Latency | Variable (internet-dependent) | Consistent, low |
+| Setup | Minutes | Weeks–months (physical provisioning) |
+| Cost | Low ($0.05/hr + data) | Higher (port + cross-connect), but cheaper data transfer |
+| Encryption | Built-in IPsec | None by default |
+
+**Use VPN when:** you need fast setup, have low-to-medium traffic, or need a backup path.
+
+**Use Direct Connect when:** you need consistent low latency, high/predictable bandwidth, or have enough sustained traffic that the reduced data-transfer rates offset the port cost.
+
+**Best practice — combine both:**
+```
+On-Prem ──┬── Direct Connect (primary) ──┐
+          └── Site-to-Site VPN (backup) ─┴──▶ AWS (Transit Gateway)
+
+BGP prefers DX; if DX fails, traffic automatically fails over to the VPN.
+```
+
+**Key points:**
+- VPN always provisions **2 tunnels** for redundancy
+- Use **BGP (dynamic routing)** for automatic failover
+- Direct Connect is private but **not encrypted** — for compliance, run **VPN over Direct Connect**
+
+---
+
+### Q2c: How do you connect on-premises to multiple VPCs across regions, and make it highly available?
+
+**Answer:**
+
+**Multi-VPC / multi-region connectivity:**
+Use a **Direct Connect Gateway** associated with a **Transit Gateway**.
+
+```
+On-Prem ── DX (Transit VIF) ── DX Gateway ── Transit Gateway ──┬── VPC (us-east-1)
+                                                               ├── VPC (eu-west-1)
+                                                               └── VPC (ap-south-1)
+```
+
+One physical DX connection, via a Transit VIF to the DX Gateway, reaches the Transit Gateway hub, which connects to all VPCs across regions. This avoids attaching connectivity to each VPC separately.
+
+**High availability layers:**
+1. **VPN:** 2 tunnels (default) + optionally 2 Customer Gateways (different on-prem routers)
+2. **Direct Connect:** Maximum Resiliency model — 2 connections at 2 different DX locations
+3. **Combined:** DX primary + VPN backup, with BGP handling automatic failover
+4. **Monitoring:** CloudWatch alarms on VPN tunnel state and DX connection state
+
+**Resiliency models for Direct Connect:**
+
+| Model | Setup | Protects against |
+|-------|-------|-----------------|
+| Development | Single connection | Nothing (dev only) |
+| High Resiliency | 2 connections, 2 DX locations | Location failure |
+| Maximum Resiliency | 4 connections (2 per location) | Device + location failure |
 
 ---
 
