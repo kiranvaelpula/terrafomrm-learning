@@ -4,6 +4,16 @@
 
 Continuous Integration and Continuous Deployment (CI/CD) for ML automates testing, validation, and deployment of ML models. It's DevOps principles applied to machine learning.
 
+## 📖 Understanding CI/CD for ML (Intuition First)
+
+In traditional software, CI/CD is an assembly line: you push code, and it's automatically built, tested, and shipped — no human manually copying files to servers. CI/CD for ML is the same assembly line idea, but with an extra worker on the line whose only job is *training and validating a model*. The pipeline doesn't just test code; it retrains the model, checks that the new model is actually good enough, and only then ships it.
+
+The reason ML needs its own flavor of CI/CD is that ML has three things that can trigger a release, not one. In normal software, you deploy when *code* changes. In ML, you might deploy because the code changed, OR because new *data* arrived, OR because the live model's performance *decayed*. That third trigger — "the model got worse, retrain and redeploy automatically" — is unique to ML and is why the pipeline includes a training and validation stage that plain DevOps pipelines don't have.
+
+The most important ML-specific gate is **model validation**. In software CI, tests check "does the code work?" In ML CI, you also need "is this model good enough to ship?" — checking accuracy against a threshold, comparing against the currently deployed model (don't ship a worse one!), and running fairness and robustness checks. A model can pass all code tests and still be a terrible model, so this statistical gate is essential before anything reaches production.
+
+Put together, an ML CI/CD pipeline typically flows: code push → build → test code → train model → validate model (the ML gate) → deploy (often canary) → monitor. And critically, the monitoring stage can *loop back* and trigger the whole pipeline again when it detects the model has decayed. That closed loop — where production monitoring automatically kicks off retraining and redeployment — is the hallmark of mature MLOps and what people mean by "Continuous Training (CT)."
+
 ## CI/CD Pipeline Stages
 
 ```
@@ -156,6 +166,19 @@ else:
 ✅ Monitoring validates deployments
 
 ---
+
+## 🎯 Interview Quick Points
+
+- CI/CD for ML = DevOps automation (build, test, deploy) plus a train-and-validate stage
+- Three release triggers in ML: **code change, new data, OR model decay** (only code in normal software)
+- **Continuous Training (CT)** is the ML-specific addition — auto-retrain on new data/decay/schedule
+- The key ML gate is **model validation**: is the new model good enough AND better than the current one?
+- Validation checks: accuracy threshold, comparison vs production model, fairness, robustness
+- A model can pass all code tests and still be a bad model — hence the statistical gate
+- Typical flow: push → build → test → train → validate → deploy (canary) → monitor
+- Monitoring **loops back** to trigger retraining — the closed loop of mature MLOps
+- Tools: GitHub Actions/GitLab CI/Jenkins + MLflow + model validation steps
+- Deploy models with canary/shadow strategies, not big-bang replacement
 
 **Next:** [Data Versioning](12-data-versioning.md)  
 **Practice:** [Lab 07 - CI/CD for ML](../mlops-practice/lab-07-cicd-ml/)

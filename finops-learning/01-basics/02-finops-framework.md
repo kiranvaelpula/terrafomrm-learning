@@ -28,6 +28,20 @@ These phases are **not linear** - you continuously cycle through them with incre
 
 ---
 
+## 📖 Understanding the FinOps Framework (Intuition First)
+
+Think about how you'd get a wildly overgrown garden under control. You wouldn't start yanking plants at random. First you'd walk the whole plot and figure out what's actually growing where — that's **Inform**. Then you'd prune, pull weeds, and replant the beds that matter — that's **Optimize**. Finally you'd set up a watering schedule and a monthly trim so it never gets that overgrown again — that's **Operate**. The FinOps framework is that same three-step rhythm applied to cloud spend.
+
+The order matters, and it's deliberate. **Inform comes first because you can't fix what you can't see.** Turning off a resource before you know who owns it or what it does is how you cause an outage. Visibility — through tagging, dashboards, and cost allocation — is the flashlight that makes every later step safe and targeted.
+
+**Optimize is where the money actually moves.** Once you can see the waste, you act: right-size oversized instances, buy commitments (Reserved Instances / Savings Plans) for steady workloads, delete orphaned resources, and move cold data to cheaper storage tiers. Each of these is a concrete, measurable change with a dollar figure attached.
+
+**Operate is what makes it stick.** A one-time cleanup drifts right back to messy without habits and automation. Operate embeds cost awareness into daily work — budget alerts, scheduled cleanups, cost checks in the deployment pipeline, and regular FinOps rituals. The aim is for optimization to become automatic and cultural rather than a heroic quarterly project.
+
+The key mental model is that this is a **loop, not a ladder**. You don't "finish" FinOps. Each trip through Inform → Optimize → Operate happens with better data, sharper tooling, and more sophisticated tactics — moving from Crawl to Walk to Run. Early cycles catch obvious waste; later cycles chase unit economics and predictive forecasting.
+
+---
+
 ## 📊 Phase 1: INFORM
 
 **Goal:** Create cost visibility and enable data-driven decisions
@@ -931,6 +945,21 @@ Results:
 5. **Iterate Rapidly:** Start small, show quick wins, build momentum and buy-in.
 
 ---
+
+## 🎯 Interview Quick Points
+
+- The FinOps framework has three phases: **Inform (visibility) → Optimize (efficiency) → Operate (culture/automation)**
+- The phases form a **continuous loop**, not a one-time linear project; each cycle grows in sophistication
+- **Inform must come first** — visibility through tagging and cost allocation makes every later action safe and targeted
+- Tagging turns "$50K on EC2" (useless) into "$30K prod, $15K dev, $5K abandoned" (actionable)
+- **Optimize** is where savings happen: right-sizing, RIs/Savings Plans, deleting waste, storage tiering
+- The four big waste categories: **orphaned, idle, over-provisioned, and unoptimized storage**
+- Right-sizing an idle m5.4xlarge down to m5.xlarge can cut ~75% of that instance's cost
+- Commitments (1-yr RIs / Savings Plans) typically save **28–32%** vs on-demand for steady workloads
+- **Operate** embeds cost management into culture: budget automation, CI/CD cost gates, weekly syncs, monthly reviews
+- Maturity model: **Crawl (10–15% savings) → Walk (25–35%) → Run (35–50%+)** over roughly a year
+- Track ROI continuously — savings, cost avoidance, budget accuracy, and unit economics
+- Start small, show quick wins early, then automate to sustain and scale
 
 ## 📚 Next Steps
 

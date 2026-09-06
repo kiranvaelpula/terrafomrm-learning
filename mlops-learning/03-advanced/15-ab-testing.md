@@ -4,6 +4,16 @@
 
 A/B testing compares two model versions in production using statistical methods to determine which performs better.
 
+## 📖 Understanding A/B Testing (Intuition First)
+
+Suppose you've baked two versions of a cookie recipe and you're convinced the new one is better. How do you *know*? Not by tasting it yourself (you're biased) — you give version A to half your customers, version B to the other half, and measure who comes back for more. That controlled comparison, with real customers and real outcomes, is A/B testing. For ML, the "recipes" are two models, and the "customers coming back" are your business metrics.
+
+The reason A/B testing exists is that **offline metrics lie about real-world impact**. A new model might have higher accuracy on your test set but actually *hurt* the business — maybe it's accurate but too aggressive, annoying users, or optimizing the wrong thing. The only way to truly know if model B beats model A is to let them both face real production traffic and measure what actually matters (revenue, conversions, engagement), not just accuracy in a lab.
+
+The critical ingredient that makes A/B testing trustworthy is **statistical significance**. If model B gets a 2% higher conversion rate over 100 users, that could easily be random luck. A/B testing uses statistics (hypothesis testing, p-values, confidence intervals) to answer: "Is this difference real, or could it be chance?" You need enough traffic and enough time before declaring a winner — calling it too early is a classic, expensive mistake that leads teams to ship models that aren't actually better.
+
+A/B testing overlaps with deployment strategies (canary is essentially a cautious A/B rollout), but its *purpose* is different: canary asks "is the new model safe?" while A/B testing asks "is the new model *better*, provably?" The rigor is higher — proper traffic splitting, controlling for confounders, and waiting for significance. It's how mature ML teams make deployment decisions based on evidence rather than hope or offline metrics alone.
+
 ## Why A/B Test Models?
 
 - Validate improvements objectively
@@ -92,6 +102,19 @@ print(f"Required sample size per variant: {int(required_n)}")
 ✅ Have rollback plan
 
 ---
+
+## 🎯 Interview Quick Points
+
+- A/B testing compares two models on real production traffic to prove which is better
+- Analogy: give two cookie recipes to different customers, measure who comes back
+- Exists because **offline metrics lie** — higher accuracy can still hurt the business
+- Measure what matters: revenue, conversions, engagement — not just accuracy
+- **Statistical significance** is essential — is the difference real or just luck?
+- Uses hypothesis testing, p-values, confidence intervals
+- Calling a winner too early (before significance) is a classic expensive mistake
+- Different from canary: canary asks "is it safe?", A/B asks "is it provably better?"
+- Requires proper traffic splitting and controlling for confounders
+- How mature ML teams make evidence-based deployment decisions
 
 **Next:** [Feature Stores](16-feature-stores.md)  
 **Practice:** [Lab 09 - A/B Testing](../mlops-practice/lab-09-ab-testing/)

@@ -4,6 +4,16 @@
 
 Distributed training splits ML model training across multiple GPUs or machines, dramatically reducing training time for large models and datasets.
 
+## 📖 Understanding Distributed Training (Intuition First)
+
+Imagine you have to grade 100,000 exams. Alone, it takes weeks. But if you split the stack among 100 teachers, each grades 1,000 and you're done in an afternoon — as long as everyone grades by the same rubric and you combine the results correctly. Distributed training is that idea applied to model training: split the enormous work of training across many GPUs or machines so it finishes in hours instead of weeks.
+
+Two problems force teams into distributed training. First, some models are simply **too big to fit** on a single GPU — a giant neural network's parameters won't fit in one GPU's memory, so you *must* spread it across several. Second, some **datasets are too large** to train on in reasonable time on one device — you want many GPUs each processing a slice in parallel. These map to the two main strategies.
+
+**Data parallelism** is the "100 teachers" approach: copy the *same model* to every GPU, give each a different slice of the data, and after each step, combine everyone's learnings (gradients) so all copies stay in sync. This is the most common approach and scales training throughput nearly linearly. **Model parallelism** is different: when the model itself is too big for one GPU, you split the *model* across GPUs — each holds part of the network. It's more complex because GPUs must pass intermediate results to each other constantly.
+
+The catch that makes distributed training hard is **coordination overhead**. Those GPUs constantly need to synchronize (sharing gradients or intermediate outputs), and that communication can become the bottleneck — add more GPUs and you might not get proportional speedup if they spend all their time talking instead of computing. This is why distributed training involves careful choices about synchronization strategy, network speed, and batch sizes. Frameworks like PyTorch DDP, Horovod, and DeepSpeed handle the coordination so you don't hand-code it. The mental model: distributed training trades added coordination complexity for dramatically faster training of large models/datasets.
+
 ## Why Distributed Training?
 
 - **Large Models:** Models too big for single GPU
@@ -142,5 +152,18 @@ horovodrun -np 4 python train.py
 ✅ Essential for large-scale ML
 
 ---
+
+## 🎯 Interview Quick Points
+
+- Distributed training splits training across multiple GPUs/machines to cut training time
+- Analogy: 100 teachers grading 100,000 exams instead of one person
+- Two drivers: model too big for one GPU, OR dataset too large to train quickly
+- **Data parallelism**: same model copied to each GPU, different data slices, sync gradients (most common)
+- **Model parallelism**: split the model itself across GPUs (when it doesn't fit on one)
+- Main challenge: **coordination/communication overhead** — GPUs sync constantly
+- More GPUs ≠ proportional speedup if communication becomes the bottleneck
+- Key tuning: synchronization strategy, network speed, batch sizes
+- Frameworks: PyTorch DDP, Horovod, DeepSpeed handle the coordination
+- Trades coordination complexity for dramatically faster large-scale training
 
 **Next:** [MLOps Best Practices](19-mlops-best-practices.md)

@@ -18,6 +18,20 @@ Reserved Instances (RIs) and Savings Plans (SPs) are **commitment-based discount
 
 ---
 
+## 📖 Understanding RIs & Savings Plans (Intuition First)
+
+Think about how a gym membership works. You can pay $15 every time you drop in (flexible, but expensive if you go often), or you can commit to a yearly membership for a much lower effective per-visit price. The gym is happy to discount you heavily because your commitment lets *them* plan ahead. Reserved Instances and Savings Plans are exactly that deal with AWS: you promise steady usage for 1–3 years, and in exchange AWS gives you 40–72% off the "drop-in" (on-demand) rate.
+
+The reason this trade exists is that on-demand pricing bakes in a premium for flexibility. AWS has to keep spare capacity ready for anyone who might spin something up at any moment, and you pay for that convenience. When you commit in advance, you remove that uncertainty for AWS, and they pass the savings back to you. Commitment discounts are the single biggest lever most companies have — often bigger than all their right-sizing combined — precisely because they cost no engineering effort, just a financial decision.
+
+The critical distinction is *what* you commit to. A **Reserved Instance** commits to a specific kind of capacity (an instance type, roughly). A **Savings Plan** commits to a dollar amount of usage per hour (e.g., "$10/hour of compute"), and AWS automatically applies the discount to whatever matches. Savings Plans trade a little maximum discount for a lot of flexibility — they follow you as you change instance families, regions, or even move to Lambda and Fargate. That's why they've become the default for dynamic, evolving workloads, while RIs remain essential for services like RDS where SPs don't apply.
+
+The core mental model for *how much* to commit is the **baseline**. Your usage over time looks like a mountain range: a steady valley floor that's always there, plus peaks that come and go. You want to commit to the valley floor (the baseline that runs 24/7) and leave the peaks on flexible on-demand or Spot. Commit to the peaks and you'll pay for capacity you don't use during the valleys — the classic over-commitment mistake.
+
+That's the whole balancing act: commit too little and you leave easy savings on the table; commit too much and you pay for idle reservations locked in for years. The winning strategy is to **start conservative** (cover ~50–60% of baseline), monitor utilization, and ratchet coverage up gradually toward 70–80% as your usage patterns prove stable. It's far cheaper to under-commit and add more than to over-commit and be stuck.
+
+---
+
 ## 🎯 Reserved Instances Explained
 
 ### What Are RIs?
@@ -658,6 +672,21 @@ Mitigation:
 - Increase commitments gradually
 
 ---
+
+## 🎯 Interview Quick Points
+
+- RIs and Savings Plans are **commitment-based discounts** — trade 1–3 year commitment for 40–72% off on-demand
+- On-demand carries a **flexibility premium**; committing removes AWS's uncertainty, so they discount you
+- **RIs commit to capacity** (instance type); **Savings Plans commit to $/hour of spend** and auto-apply
+- Savings Plans give **more flexibility** (across families, regions, Lambda, Fargate) for slightly less max discount
+- Use **RIs for RDS/ElastiCache/Redshift** (SPs don't cover them) and **SPs for compute**
+- Commit to your **baseline** (the 24/7 valley floor), leave peaks on on-demand/Spot
+- Payment options trade cash flow for discount: **All Upfront > Partial > No Upfront**
+- The #1 mistake is **over-committing** — start at ~50–60% of baseline and ratchet up to 70–80%
+- **Convertible RIs** allow changing instance families; use them if infrastructure is evolving
+- Monitor **utilization (>90% target)** and **coverage** monthly — unused commitments are pure waste
+- Typical **payback is 3–9 months**; ROI is often $3–5 saved per $1 committed
+- It's the **highest-ROI, lowest-effort** lever — a financial decision, not an engineering project
 
 ## 📚 Next Steps
 

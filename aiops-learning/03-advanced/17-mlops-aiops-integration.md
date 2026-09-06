@@ -2,6 +2,18 @@
 
 Learn how to integrate MLOps practices with AIOps to build, deploy, and maintain machine learning models for IT operations at scale.
 
+## 📖 Understanding MLOps for AIOps (Intuition First)
+
+Before the tooling, let's build the intuition for why AIOps *needs* MLOps — and what goes wrong without it.
+
+Here's a trap many teams fall into: they build a brilliant anomaly-detection model in a notebook, it works great in the demo, they copy it to a server, and declare victory. Six months later it's quietly useless — flagging normal traffic as anomalies, missing real incidents — and nobody noticed. The model didn't break; the *world* changed around it. Traffic patterns shifted, new services launched, the definition of "normal" moved. A model is not a build-once artifact like a compiled binary; it's more like a living thing that ages and needs feeding. MLOps is the discipline of keeping models healthy over their entire life, not just birthing them.
+
+The core intuition is that an AIOps model has a full **lifecycle**, and each stage needs engineering rigor. **Experiment tracking** (MLflow) is a lab notebook — recording which algorithm, which hyperparameters, and which data produced which score, so you can reproduce and compare instead of guessing. The **model registry** is a version-controlled shelf with clear labels (Staging, Production, Archived) so you always know exactly what's serving live traffic and can roll back in seconds. **Deployment pipelines** wrap the model in an API and ship it reliably, the same way every time.
+
+The part that separates AIOps from ordinary software is **drift** — and this is the idea interviewers love. There are two kinds. **Data drift** means the *inputs* changed: the metrics coming in look statistically different from what the model trained on (detected with tests like Kolmogorov-Smirnov). **Model drift** (concept drift) means the model's *accuracy* is silently decaying against reality. Both are invisible unless you actively monitor for them, which is why continuous monitoring and automated retraining aren't luxuries — they're the whole point. When drift is detected, a **continuous training pipeline** kicks off, trains a fresh model on recent data, and only promotes it if it actually beats the current one.
+
+Two more ideas complete the picture. A **feature store** guarantees that the exact same feature calculations are used in training and in live inference — a subtle but notorious source of bugs when they diverge. And **A/B testing / canary deployments** let you prove a new model is genuinely better on real traffic before trusting it fully, rather than swapping blindly. The through-line: MLOps turns AIOps models from fragile science experiments into reliable, self-renewing production systems — versioned, monitored, and safe to change.
+
 ---
 
 ## Why MLOps for AIOps?
@@ -730,6 +742,21 @@ spec:
 8. **Use Feature Store**: Consistent features for training and inference
 
 ---
+
+## 🎯 Interview Quick Points
+
+- A model isn't a build-once artifact — it ages as the world changes and needs ongoing care
+- MLOps manages the full model **lifecycle**: experiment → register → deploy → monitor → retrain
+- **Experiment tracking** (MLflow) is a lab notebook: records params, data, and metrics for reproducibility
+- **Model registry** versions models with stages (Staging/Production/Archived) and enables fast rollback
+- **Data drift** = inputs changed statistically (detect with KS test); **model drift** = accuracy silently decayed
+- Both drift types are invisible without active **monitoring** — this is core to AIOps model reliability
+- **Continuous training** retrains on recent data and only promotes a model that beats the current one
+- A **feature store** ensures identical feature computation in training and inference (avoids skew bugs)
+- **A/B testing / canary** proves a new model is better on real traffic before full rollout
+- Always keep a fast **rollback** path if a new model misbehaves
+- **Version everything**: model, features, code, and data; track lineage
+- The payoff: turn fragile notebook models into reliable, self-renewing production systems
 
 ## Summary
 

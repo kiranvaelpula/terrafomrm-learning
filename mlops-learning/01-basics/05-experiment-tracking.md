@@ -4,6 +4,18 @@
 
 Experiment tracking is the practice of logging, organizing, and comparing machine learning experiments. It's fundamental to MLOps because it enables reproducibility, collaboration, and continuous improvement.
 
+## 📖 Understanding Experiment Tracking (Intuition First)
+
+Imagine a scientist working in a lab without a lab notebook. They run dozens of experiments — different temperatures, different reagents, different amounts — and one of them produces a breakthrough. But they didn't write anything down. Which combination worked? What was the exact concentration? They can't say, and they can't reproduce it. Every serious scientist keeps a meticulous notebook precisely because memory fails and results are worthless if you can't recreate them. Experiment tracking is the ML scientist's lab notebook.
+
+Training ML models is inherently a search process. You try 50 combinations of hyperparameters, feature sets, and data versions, hoping to find the best one. Without tracking, you're doing this from memory — and human memory collapses under that load. You end up asking "wait, which run got 92%? What learning rate did I use? Where did that model file go?" Experiment tracking answers all of those automatically by logging every run's inputs, outputs, and artifacts.
+
+The key mental model is to separate three things: **parameters** (the knobs you set — the *inputs* you control), **metrics** (the results you measure — the *outputs*), and **artifacts** (the files produced — models, plots, logs). A tracking tool like MLflow records all three for every run, plus metadata like the date, the git commit, and the data version. That metadata is what turns a lucky result into a *reproducible* result.
+
+Why does this matter beyond tidiness? Three reasons. **Reproducibility** — you can recreate any past result exactly. **Comparison** — you can line up 50 runs and instantly see which configuration won and why. **Collaboration** — your whole team sees the same history instead of trading model files over email. These are the same problems version control solved for code, applied to the messy, experiment-heavy world of ML.
+
+The habit to build is simple: track *everything*, from the very first experiment, even during exploration. It costs a few extra lines of code per run, and it's the difference between a model you can explain and defend versus a black box you stumbled into and can never rebuild. In production MLOps, this history also becomes the audit trail regulators and stakeholders ask for.
+
 ## The Problem Without Experiment Tracking
 
 Imagine training 50 models with different hyperparameters:
@@ -431,6 +443,21 @@ class MLPipelineWithTracking:
             
             return model, metrics
 ```
+
+## 🎯 Interview Quick Points
+
+- Experiment tracking is the **"lab notebook" of ML** — it logs, organizes, and compares training runs
+- It enables the three big wins: **reproducibility, comparison, and collaboration**
+- Track three things: **parameters** (inputs you control), **metrics** (outputs you measure), **artifacts** (files produced)
+- Also track **metadata**: date, git commit, data version, environment, hardware — this is what makes results reproducible
+- **MLflow** is the industry-standard open-source tracking tool (`log_param`, `log_metric`, `log_artifact`, `log_model`)
+- Use **meaningful experiment/run names** and **tags** instead of "exp1" so runs are findable later
+- **Nested runs** are ideal for organizing hyperparameter sweeps under a single parent run
+- You can **query runs programmatically** (e.g., search runs ordered by accuracy) to find the best model
+- Reproducing an experiment = same **parameters + data version + code version + environment** → same result
+- Alternatives to MLflow: **Weights & Biases, Neptune, TensorBoard**
+- Integrate tracking **directly into your pipeline** so every production run is logged automatically
+- Build the habit of tracking **from the very first experiment** — retrofitting it later loses history you can't recover
 
 ## Key Takeaways
 

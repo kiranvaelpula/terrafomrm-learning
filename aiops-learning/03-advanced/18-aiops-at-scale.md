@@ -2,6 +2,18 @@
 
 Learn how to build and operate AIOps platforms that handle enterprise-scale data volumes, multiple teams, and thousands of services.
 
+## 📖 Understanding AIOps at Scale (Intuition First)
+
+Before the architecture diagrams, let's build the intuition for why "AIOps at scale" is a fundamentally different problem, not just "the same thing but bigger."
+
+Think about the difference between cooking dinner for your family and running the kitchen for a stadium of 50,000 people. It's not the same recipe scaled up — it's a completely different discipline. You can't have one chef at one stove; you need assembly lines, industrial storage, parallel prep stations, and systems to make sure the food doesn't spoil while it waits. Cross a certain threshold and *quantity becomes a quality problem*. AIOps hits exactly this wall: techniques that work beautifully for 10 services collapse under 1000. At 10 million metrics per second and 10TB of logs a day, "just store it all and query it later" simply stops working — storage costs explode, queries crawl, and training a model takes days.
+
+The first big intuition is **decouple ingestion from processing** using a buffer. You can't have data producers talk directly to consumers at this volume — one slow consumer would stall everything. A message queue like **Kafka** acts like a conveyor belt: producers drop data on it and move on, and any number of consumers pull from it at their own pace. This buffering is what lets the system absorb bursts and scale each stage independently. On top of it, **stream processing** (Flink) analyzes data *as it flows by* in small time windows, rather than waiting to store everything first.
+
+The second intuition is that **you can't afford to keep everything at full fidelity forever**, so storage becomes tiered and time-aware. Recent data is kept hot and detailed (fast, expensive); older data is downsampled and moved to cheaper cold storage; ancient data is deleted — all automated via lifecycle policies (ILM) and downsampling. This is the storage equivalent of "keep this week's receipts on your desk, last year's in the attic, and shred the decade-old ones."
+
+The rest of the chapter follows from these pressures. **Distributed training** (Ray, Spark) splits model training across many machines because one machine can't chew through 100GB in reasonable time. **Horizontal scaling + load balancing** run many copies of each AIOps service so no single instance is a bottleneck. **Caching** (Redis) and **batch prediction** avoid recomputing the same expensive things. **Multi-tenancy** isolates each team's data and models so they don't interfere or leak. And crucially, you must **monitor the AIOps platform itself** — at this scale, the observability system needs its own observability. The unifying theme: at scale, every naive assumption ("store it all," "one model," "process on demand") breaks, and the solutions are all variations of *distribute, buffer, tier, cache, and isolate*.
+
 ---
 
 ## Challenges at Scale
@@ -819,6 +831,21 @@ class MonitoredAIOps:
 ```
 
 ---
+
+## 🎯 Interview Quick Points
+
+- At scale, quantity becomes a *quality* problem — techniques for 10 services collapse at 1000+
+- Enterprise scale means 10M+ metrics/sec and 10TB+ logs/day; "store it all, query later" breaks
+- **Decouple ingestion from processing** with a message queue (**Kafka**) acting as a buffer/conveyor belt
+- Buffering lets you absorb bursts and scale each stage independently
+- **Stream processing** (Flink) analyzes data as it flows in time windows, before storing everything
+- **Tiered, time-aware storage**: hot (recent/detailed) → warm → cold → delete, automated via ILM + downsampling
+- **Distributed training** (Ray, Spark) splits model training across many machines
+- **Horizontal scaling + load balancing** run many replicas so no single instance bottlenecks
+- **Caching** (Redis) and **batch prediction** avoid recomputing expensive features/predictions
+- **Multi-tenancy** isolates each team's data and models for security and no interference
+- **Monitor the AIOps platform itself** — the observability system needs its own observability
+- Recurring theme: distribute, buffer, tier, cache, and isolate
 
 ## Summary
 

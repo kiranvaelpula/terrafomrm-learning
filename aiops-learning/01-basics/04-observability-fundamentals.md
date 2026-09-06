@@ -8,6 +8,20 @@
 
 ---
 
+## 📖 Understanding Observability (Intuition First)
+
+Before the code and tooling, let's build the intuition for what observability really means and why it's different from plain monitoring.
+
+Imagine your car's dashboard. **Monitoring** is the set of warning lights the manufacturer decided you needed: check engine, low fuel, high temperature. They answer *known* questions the designer anticipated. That's great — until something happens that no warning light covers. **Observability** is having a full diagnostic port that lets a mechanic ask *any* question after the fact: "Why did the engine stutter at 60mph last Tuesday going uphill?" You didn't pre-plan that question, but because the car recorded rich internal signals, you can investigate it. Monitoring handles *known unknowns*; observability handles *unknown unknowns*.
+
+This distinction matters enormously in modern distributed systems. When you had one big application on one server, a few dashboards told you everything. But a single user request today might touch twenty microservices across multiple clusters. When it's slow, "CPU is at 60%" tells you almost nothing about *which* of those twenty hops caused the delay. You need to be able to explore, correlate, and drill down — you need observability.
+
+Observability rests on **three pillars**, and the intuition for each is simple. **Metrics** answer *"what is happening?"* — they're cheap numeric measurements over time, like the car's speedometer and temperature gauge. **Logs** answer *"what happened?"* — they're detailed, timestamped records of individual events, like the car's detailed service diary. **Traces** answer *"how did it happen?"* — they follow one request end-to-end across every service it touched, like GPS tracking a single delivery truck through every stop on its route.
+
+The real power isn't any one pillar — it's **correlation**. A metric tells you latency spiked; the trace shows *which service* was slow; the logs from that service (linked by a shared `trace_id`) reveal the exact error. This is exactly the foundation AIOps needs: rich, correlated, high-cardinality data. Without good observability, an AIOps model is a detective with no evidence. With it, the model can detect anomalies, correlate signals, and pinpoint root causes automatically. That's why observability comes *before* AIOps — it's the sensory system the intelligence is built on.
+
+---
+
 ## What is Observability?
 
 **Observability** is the ability to understand the internal state of a system by examining its external outputs.
@@ -709,6 +723,24 @@ Observability enables you to:
 3. **Correlate signals** - link metrics, logs, traces
 4. **Sample intelligently** - balance cost and visibility
 5. **Make it actionable** - observability drives AIOps
+
+---
+
+## 🎯 Interview Quick Points
+
+- **Monitoring** answers known unknowns ("is CPU > 80%?"); **observability** answers unknown unknowns ("why is this request slow?")
+- Observability = understanding a system's internal state from its external outputs
+- The **three pillars**: metrics (what), logs (what happened), traces (how it happened across services)
+- **Metrics** are cheap, aggregated numbers over time; great for dashboards and alerts
+- **Logs** are discrete, detailed, timestamped events; best for deep context
+- **Traces** follow a single request end-to-end through distributed services
+- **Correlation via trace_id** is the superpower — link a latency spike to the exact slow span and its error log
+- Common frameworks for what to measure: **RED** (Rate, Errors, Duration), **USE** (Utilization, Saturation, Errors), and the **Four Golden Signals** (Latency, Traffic, Errors, Saturation)
+- Watch **cardinality** — don't put unbounded values (like user_id) in metric labels; use trace/log attributes instead
+- **Sample intelligently**: always keep errors and slow requests, sample a small % of normal traffic
+- **Context propagation** carries trace context across service boundaries (inject/extract headers)
+- Observability is the **prerequisite for AIOps** — models need rich, correlated data to detect and diagnose
+- Standard stack: Prometheus + Grafana (metrics), ELK/Loki (logs), Jaeger/OpenTelemetry (traces)
 
 ---
 

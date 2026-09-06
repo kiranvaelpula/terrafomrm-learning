@@ -13,6 +13,20 @@ Unit economics answers the question: "How much does it cost to serve one custome
 
 ---
 
+## 📖 Understanding Unit Economics (Intuition First)
+
+Imagine you run a coffee shop. Knowing your total monthly expenses is $10,000 is almost useless on its own — the number that actually tells you whether the business works is the **cost to make one cup of coffee**. If each cup costs you $1.50 to produce and you sell it for $4, you have a healthy business. If it costs you $4.50, you're losing money on every sale and growing will only bankrupt you faster. Unit economics is that "cost per cup" thinking applied to cloud infrastructure.
+
+The reason unit economics matters so much is that it connects a technical number (your AWS bill) to a business number (revenue, customers, transactions). A rising cloud bill isn't automatically bad — if your bill doubled but you're serving five times as many customers, your efficiency actually *improved*. Total cost alone can't tell you that; cost *per unit* can. It's the difference between "we spend a lot" and "we spend $0.15 per transaction, down from $0.22."
+
+Choosing the right **unit** is the whole game. The unit has to be something the business cares about: cost per active user for a SaaS product, cost per order for e-commerce, cost per million API calls for an API platform. A bad unit (like "cost per server") is too technical to guide business decisions. A good unit lets an executive instantly judge whether the business scales profitably.
+
+The power move with unit economics is watching the **trend over time**, not the absolute number. A single figure ("$0.04 per transaction") means little in isolation. But "$0.22 → $0.18 → $0.15 over three months" tells a clear story of improving efficiency, and it's exactly the kind of narrative a CFO wants to hear. It also reframes optimization work as measurable business impact rather than vague "cost savings."
+
+Finally, unit economics is how engineering earns a seat at the strategy table. When you can say "at our current cost per user we hit profitability at 2M users, and here are three optimizations that move that breakeven point," you've turned infrastructure decisions into business decisions. That's the ultimate goal — making technical choices legible in the language of the business.
+
+---
+
 ## What Are Unit Economics?
 
 ### Definition
@@ -799,6 +813,21 @@ smb: $0.30 per transaction
 ```
 
 ---
+
+## 🎯 Interview Quick Points
+
+- **Unit economics** = total infrastructure cost ÷ a business unit (users, transactions, API calls, GB)
+- It connects a **technical number** (the cloud bill) to a **business number** (revenue, customers)
+- Total spend alone is misleading — cost *per unit* reveals whether the business scales profitably
+- Choosing a **meaningful unit** is critical: cost per user (SaaS), per order (e-commerce), per 1M calls (API)
+- Track the **trend over time**, not just the absolute figure — improvement tells the story
+- Include **all** costs (infra + payment processing + third-party APIs), not just AWS, for a true unit cost
+- Unit economics lets you find and prioritize the **highest-cost operations** for optimization
+- Present it in **business terms** to executives: gross margin, breakeven point, cost as % of revenue
+- A falling cost per unit while volume grows = **improving efficiency**, even if total spend rises
+- Segment by **customer tier** (enterprise vs SMB) to spot which segments are actually profitable
+- It's the metric that earns engineering a **seat at the strategy table**
+- Common cloud levers to improve it: Graviton/ARM, caching, right-sizing, and commitment discounts
 
 ## Summary
 

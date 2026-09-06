@@ -13,6 +13,20 @@ FinOps = Making cloud costs everyone's responsibility, with tools and processes 
 
 ---
 
+## 📖 Understanding FinOps (Intuition First)
+
+Imagine a big shared household where everyone can order whatever they want on a single credit card, and the bill only arrives at the end of the month. One person orders takeout every night, another leaves every light on, someone else signs up for five streaming services. Nobody is being malicious — they just can't see the running total, and nobody feels responsible for the shared card. The bill arrives and everyone is shocked. That is exactly what happens with cloud spending before FinOps.
+
+FinOps is the practice of putting a live, itemized receipt in front of everyone in that household, agreeing on who is responsible for what, and giving people the tools to make smart choices in the moment. It's not about telling people they can't order takeout. It's about making sure they know it costs money, can see how much, and can decide whether it's worth it.
+
+The reason FinOps exists is a shift in how we buy computing. In the old world, you bought servers up front (a big, slow, finance-approved purchase) and used them for years. In the cloud, any engineer can spin up expensive resources in seconds with a line of code. That speed is wonderful for building fast, but it decouples the person spending the money (engineering) from the person accountable for the budget (finance). FinOps reconnects them.
+
+The core insight is that cloud cost is a **variable, engineering-driven metric**, not a fixed line item finance can control alone. An architectural decision — the size of an instance, whether autoscaling is on, how data is stored — *is* a spending decision. So the people making those decisions need to see the cost consequences, the same way they already see performance and reliability consequences.
+
+Crucially, FinOps is about **value, not just savings**. Sometimes the right answer is to spend more — to launch faster, to serve customers better, to grow. The goal is to make spending *intentional* and tied to business outcomes, so that every dollar spent is a dollar someone chose to spend for a reason.
+
+---
+
 ## 🎯 The Problem FinOps Solves
 
 ### **Traditional IT (Pre-Cloud):**
@@ -626,6 +640,21 @@ The goal isn't just reducing costs - it's building a culture where engineers nat
 4. **Core metrics**: Total spend, cost per team, unit economics, waste %
 5. **Start simple**: Tag resources, set budgets, create reports
 6. **Think continuous**: It's ongoing practice, not one-time project
+
+## 🎯 Interview Quick Points
+
+- FinOps = a **cultural practice + operating model** that makes cloud cost a shared, data-driven responsibility across engineering, finance, and business
+- The core problem: cloud shifts spend from predictable **CapEx** to variable **OpEx**, decoupling who spends from who's accountable
+- It is about **maximizing business value**, not just cutting costs — sometimes spending more is the right call
+- The three phases are **Inform → Optimize → Operate**, and they cycle continuously rather than run once
+- The three personas are **Finance, Engineering, and Business** — all must collaborate
+- Key principle: **centralized governance, decentralized execution** (central team sets standards; teams optimize themselves)
+- Visibility comes first — you can't optimize what you can't see, and tagging is the foundation
+- Core metrics: total spend, cost per team/service, **unit economics** (cost per customer/transaction), and waste %
+- Typical cloud waste is **30–40%**; a mature practice can cut 30–50% while maintaining velocity
+- Maturity follows a **Crawl → Walk → Run** model over months, not a big-bang project
+- The FinOps team **enables** optimization; it doesn't approve every deployment or optimize every resource itself
+- Quick wins (deleting orphaned resources, right-sizing) build momentum and executive buy-in early
 
 ### **Next Steps:**
 

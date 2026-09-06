@@ -8,6 +8,20 @@
 
 ---
 
+## 📖 Understanding Capacity Planning (Intuition First)
+
+Before the forecasting code, let's build the intuition for what capacity planning is really about — it's a balancing act between two expensive mistakes.
+
+Think of running a restaurant. If you staff too few waiters on a busy night, customers wait forever, get angry, and leave — you lose revenue and reputation (an outage). But if you staff a full crew every single night "just in case," you're paying a fortune in wages for people standing around on quiet Tuesdays (wasted spend). Capacity planning is figuring out *exactly* how many waiters you need, *when* — enough to handle the rush, not so many that you're burning money. In infrastructure, the "waiters" are CPU, memory, storage, and network.
+
+The traditional way to do this was spreadsheets and gut feel: an engineer eyeballs last month's usage, adds a fudge factor, and orders servers. This fails in two directions — it either over-provisions (expensive) or gets caught off guard by growth (outages). The AIOps insight is that resource usage is *predictable* because it follows patterns: it has daily rhythms (busy at 2pm, quiet at 2am), weekly rhythms (weekdays vs weekends), and long-term trends (steady growth as the business scales). If you can model those patterns, you can forecast the future.
+
+That's why **forecasting with seasonality** (tools like Prophet) is the heart of this chapter. Instead of a naive "usage grew 5% last month, assume 5% forever," these models separately learn the daily cycle, the weekly cycle, and the underlying growth trend, then project them forward with a confidence band. The practical payoff is a sentence every ops leader wants: *"At current growth, CPU will cross 80% capacity in 23 days — provision more before then."* You act on a schedule, calmly, instead of scrambling during an outage.
+
+The final layer of intuition is that capacity planning isn't only about *avoiding* shortages — it's equally about **cost**. The same forecasts that tell you when to scale *up* also reveal when you're chronically over-provisioned, when steady baseline load justifies cheaper reserved instances, when cold data should move to cheaper storage tiers, and when a spiky peak-to-average ratio means auto-scaling would save money. Good capacity planning turns infrastructure spend from a guessing game into a data-driven optimization — right-sized, cost-aware, and ahead of demand.
+
+---
+
 ## What is Capacity Planning?
 
 Capacity planning ensures you have sufficient resources to meet demand:
@@ -467,13 +481,20 @@ for resource, status in report['resources'].items():
 
 ---
 
-## Summary
+## 🎯 Interview Quick Points
 
-AIOps-powered capacity planning enables:
-- Accurate resource forecasting
-- Proactive capacity management
-- Cost optimization
-- Automated scaling decisions
+- Capacity planning balances two costly mistakes: **under-provisioning** (outages) vs **over-provisioning** (wasted spend)
+- Goal is **right-sizing**: enough to meet demand and SLAs, not so much you burn money
+- Traditional approach (spreadsheets, guesswork) fails in both directions; AIOps makes it data-driven
+- Resource usage is **predictable** — it has daily, weekly, and long-term (growth) patterns
+- **Forecasting with seasonality** (Prophet) separates daily/weekly cycles from the underlying trend
+- Forecasts come with a **confidence band** (yhat_lower/upper), not just a single line
+- The actionable output: "usage will cross X% capacity in N days — provision before then"
+- **Growth rate analysis** projects long-term needs and finds inflection points (accelerating growth)
+- Capacity planning is also **cost optimization**: reserved instances for steady load, tiering for cold data
+- A high **peak-to-average ratio** signals a good candidate for **auto-scaling**
+- **Proactive scaling** (scheduled ahead of a forecasted breach) beats reactive scaling during an incident
+- Combine forecasting + thresholds + auto-scaling for closed-loop, self-managing capacity
 
 ---
 

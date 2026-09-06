@@ -13,6 +13,20 @@ Cost visibility is the foundation of FinOps. Without knowing where money goes, y
 
 ---
 
+## 📖 Understanding Cost Visibility & Tagging (Intuition First)
+
+Imagine a warehouse full of unlabeled boxes. You know the warehouse costs a fortune to run, but you have no idea which boxes belong to which department, which are full of valuable inventory, and which are just empty boxes taking up space. You literally cannot make a good decision because nothing is labeled. A cloud account without tags is exactly that warehouse — a big bill and no way to know who owns what.
+
+**Tags are the labels on the boxes.** A tag is just a key-value sticker you attach to a resource: `Team=payments`, `Environment=prod`, `Project=checkout`. On their own they seem trivial. But once every resource carries consistent labels, the fog lifts: suddenly you can answer "which team spent the most?", "how much does dev cost versus prod?", and "what's the cost of the checkout project?" — questions that are impossible to answer otherwise.
+
+The reason visibility is the *first* thing FinOps tackles is cause and effect. Optimization, accountability, budgeting, and forecasting all depend on being able to attribute spend to something meaningful. You can't hold a team accountable for a cost they can't see, and you can't optimize a workload you can't identify. Visibility is the foundation everything else is built on.
+
+The hard part of tagging isn't technical — it's **consistency**. If one team writes `prod`, another writes `production`, and a third writes `PROD`, your reports fragment into meaningless slivers. This is why mature organizations enforce tags with policies, apply them automatically at creation time (via Terraform or CDK), and audit for untagged resources rather than trusting everyone to remember.
+
+Finally, visibility enables the choice between **showback and chargeback**. Showback means teams *see* their costs (awareness without a bill); chargeback means teams are *actually charged* (real financial accountability). Both require the same tagging foundation — you're just deciding whether the receipt is informational or comes with an invoice attached.
+
+---
+
 ## Why Cost Visibility Matters
 
 ### The Problem
@@ -777,6 +791,21 @@ ModifiedDate: 2026-02-10
 - **Kubecost** - Kubernetes cost visibility
 
 ---
+
+## 🎯 Interview Quick Points
+
+- **Cost visibility is the foundation of FinOps** — you can't optimize, allocate, or budget what you can't see
+- **Tags** are key-value labels on resources; they turn a lump-sum bill into an attributable breakdown
+- Start with 5–7 **essential tags** (Environment, Owner, Application, CostCenter, Project) — not 20 nobody maintains
+- The #1 tagging failure is **inconsistent values** (prod vs production vs PROD) — enforce allowed values with **Tag Policies**
+- Tag at **creation time** via Terraform/CDK defaults; back it up with **automated enforcement** (Lambda) and regular audits
+- Activate **cost allocation tags** in billing before they appear in Cost Explorer reports
+- **Cost Categories** let you group spend into business dimensions (e.g., Business Unit) on top of raw tags
+- **Showback** = teams see their costs (awareness); **Chargeback** = teams are financially billed (accountability)
+- Untagged resources are a red flag — they hide waste and break allocation; report on them weekly
+- Resource Groups and consistent naming make tracking and automation far easier
+- Tools range from AWS-native (Cost Explorer, CUR, Budgets) to third-party (CloudHealth, Cloudability, Kubecost)
+- Good tagging is what makes team budgets, chargeback, and unit economics possible downstream
 
 ## Summary
 

@@ -1,0 +1,16 @@
+# Secrets — NEVER commit
+.env
+*.key
+credentials
+
+# Python
+__pycache__/
+*.pyc
+genai-env/
+venv/
+.venv/
+
+# Vector DB local storage
+chroma/
+*.chroma
+.chromadb/

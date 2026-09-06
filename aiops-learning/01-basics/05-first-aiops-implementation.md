@@ -8,6 +8,20 @@
 
 ---
 
+## 📖 Understanding Your First AIOps Implementation (Intuition First)
+
+Before you write the code, let's understand the *shape* of what you're building and why every piece exists.
+
+Think of learning to cook by making a single complete meal rather than reading the whole cookbook. You could spend months studying knife techniques, sauces, and plating in isolation — or you could cook one full dish end-to-end and suddenly understand how the steps connect. This first AIOps implementation is that complete meal: small and simple, but it exercises every stage of a real AIOps loop so the concepts click into place.
+
+Every AIOps system, no matter how sophisticated, follows the same fundamental loop: **collect → detect → alert → act**. In this project you collect metrics from a web app (Prometheus), detect unusual behavior with a machine learning model (Isolation Forest), and fire an alert when something looks wrong. That's the whole heartbeat of AIOps in miniature. Once you see it working on one metric, scaling to hundreds of services is "more of the same," not something new.
+
+A key idea worth internalizing here is the **train-then-detect** pattern. The anomaly detector first *learns what normal looks like* from a window of historical data, then flags anything that deviates. This is why the model needs a training phase before it can be useful — it has no built-in notion of "normal CPU" or "normal latency" for *your* system; it has to observe your baseline first. That's also why we generate synthetic normal traffic and then a spike: it lets you actually *watch* the detector catch an anomaly it wasn't told about in advance.
+
+Notice too that this project deliberately keeps a **human in the loop** — alerts print and (optionally) go to Slack rather than automatically restarting services. That's intentional and reflects real-world best practice: you earn trust in your detection before you let it take automated action. Start by observing and alerting; graduate to auto-remediation only once the false-positive rate is low. This crawl-walk-run approach is exactly how mature teams roll out AIOps safely.
+
+---
+
 ## Project Overview
 
 We'll build a simple but complete AIOps system that:
@@ -643,6 +657,21 @@ wait
 ```
 
 ---
+
+## 🎯 Interview Quick Points
+
+- Every AIOps system follows the same loop: **collect → detect → alert → act**
+- This project wires that loop together: Prometheus (collect) → Isolation Forest (detect) → alert manager (alert)
+- **Isolation Forest** is a good first anomaly-detection choice — unsupervised, fast, works without labeled data
+- The **train-then-detect** pattern: the model must learn *your* baseline of "normal" before it can flag anomalies
+- **Feature engineering** matters even for simple models — time-of-day, rolling mean/std, and rate-of-change add context
+- Prometheus uses a **pull model**, scraping the app's `/metrics` endpoint on an interval
+- Generate synthetic normal traffic *and* a spike so you can actually watch the detector catch an anomaly
+- **Keep a human in the loop first** — alert before you auto-remediate; earn trust in detection accuracy
+- Tune **contamination** (expected anomaly fraction) and watch the false-positive rate closely
+- Alert fatigue is real — use thresholds/windows so a single blip doesn't page the on-call engineer
+- The crawl-walk-run path: observe → alert → auto-remediate, only advancing as confidence grows
+- Grafana visualizes the metrics; dashboards make anomalies and trends human-readable
 
 ## Next Steps
 

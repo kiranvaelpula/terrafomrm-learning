@@ -4,6 +4,16 @@
 
 Model versioning is the practice of tracking different versions of trained ML models, similar to how Git versions code. It's essential for reproducibility, collaboration, and production deployment.
 
+## 📖 Understanding Model Versioning (Intuition First)
+
+Picture a pharmacy that keeps every batch of a medication it has ever produced, each labeled with exactly what went into it and when. If a batch turns out to have a problem, they can instantly identify which patients got it, roll back to the previous safe batch, and trace precisely what changed. Now imagine a pharmacy that just had bottles labeled "medicine," "medicine_new," and "medicine_final_v2" — chaos, and impossible to trace a problem. Model versioning is the difference between those two worlds for ML.
+
+A model isn't a single file — it's the *result* of a specific combination: this code, trained on this data, with these hyperparameters, producing these metrics. Versioning captures that whole bundle so any model can be reproduced, audited, and compared. The infamous `model_FINAL_FOR_REAL.pkl` naming disaster happens because people treat models as loose files instead of versioned artifacts with lineage.
+
+Why does this matter so much in production? Because when a deployed model starts misbehaving, your first move is to **roll back** to the last known-good version — and you can only do that if you know exactly which version is running, which came before it, and how they differ. Versioning also enables A/B testing (run v2 against v1), auditing (which model made this decision six months ago?), and collaboration (two data scientists building on the same lineage without overwriting each other).
+
+Crucially, model versioning is not the same as *code* versioning. Git tracks your training script, but the same script run on different data or with different random seeds produces a different model. That's why model versioning ties together **code + data + config + metrics + the model artifact itself** — all four, not just the code.
+
 ## Why Version Models?
 
 **The Problem:**
@@ -177,6 +187,19 @@ A: Models are artifacts trained on data at specific points in time, unlike code 
 A: Versioned code, versioned data, logged parameters, saved random seeds, and documented environment.
 
 ---
+
+## 🎯 Interview Quick Points
+
+- Model versioning tracks different trained model versions, like Git for code
+- A model version bundles **code + data + config + metrics + the artifact** — not just code
+- Solves the `model_FINAL_FOR_REAL.pkl` naming chaos with proper lineage
+- Enables the critical production capability: **rollback** to the last known-good model
+- Also enables A/B testing, auditing ("which model made this decision?"), and collaboration
+- Model versioning ≠ code versioning — same code + different data/seed = different model
+- Use semantic versioning (v1.0.0) and store lineage metadata
+- **MLflow Model Registry** is the standard tool; tracks versions and stages
+- Reproducibility requires: versioned code, versioned data, logged params, fixed random seeds, documented environment
+- Every production model must be traceable back to how it was created
 
 **Next:** [ML Model Registry](08-model-registry.md)  
 **Practice:** [Lab 04 - Model Registry](../mlops-practice/lab-04-model-registry/)

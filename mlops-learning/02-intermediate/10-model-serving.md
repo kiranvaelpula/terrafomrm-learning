@@ -4,6 +4,16 @@
 
 Model serving is the process of making trained ML models accessible for predictions, typically via APIs. It's the bridge between model training and real-world use.
 
+## 📖 Understanding Model Serving (Intuition First)
+
+A trained model sitting in a file is like a brilliant expert locked in a room with no phone — all that knowledge, completely unreachable. Model serving is opening a phone line to that expert so applications can *ask questions and get answers*. Until you serve it, a model delivers exactly zero business value, no matter how accurate it is.
+
+The central design question in serving is *when* predictions are needed. Sometimes you need answers instantly, one at a time, while a user waits — a fraud check as someone clicks "pay," or a recommendation as a page loads. That's **online/real-time serving**, and it lives or dies by latency (often needing sub-100ms responses). Other times you need to score millions of records overnight with no user waiting — like generating churn scores for every customer before the morning report. That's **batch serving**, where throughput matters far more than latency.
+
+This distinction drives everything downstream. Real-time serving needs an always-on API, autoscaling for traffic spikes, low-latency infrastructure, and careful attention to the model's response time. Batch serving needs a scheduler, efficient bulk processing, and somewhere to store results — but doesn't care if a single prediction takes a second. Choosing the wrong pattern is a classic mistake: forcing batch-style heavy models into a real-time path causes timeouts, while running real-time infrastructure for a nightly job wastes money.
+
+Serving is also where MLOps concerns get very real: you need to handle versioning (which model answers?), scaling (traffic isn't constant), monitoring (is it still accurate and fast?), and the dreaded **training/serving skew** — where features are computed slightly differently in serving than in training, silently corrupting predictions. This is why feature stores and shared transformation pipelines matter so much: the model must see production data in *exactly* the same shape it saw during training.
+
 ## Serving Patterns
 
 ### 1. Batch Prediction
@@ -153,6 +163,19 @@ def predict(data):
 ✅ Use frameworks for production serving
 
 ---
+
+## 🎯 Interview Quick Points
+
+- Model serving makes a trained model accessible for predictions (usually via API)
+- Without serving, a model delivers zero value no matter how accurate
+- **Online/real-time serving**: one prediction at a time, user waiting, latency-critical (<100ms)
+- **Batch serving**: score millions of records offline, throughput matters, latency doesn't
+- Choosing the wrong pattern is a classic mistake (batch model in real-time path = timeouts)
+- Real-time needs: always-on API, autoscaling, low-latency infra
+- Batch needs: scheduler, bulk processing, result storage
+- **Training/serving skew** is a major risk — features must be computed identically in both
+- Feature stores and shared pipelines prevent training/serving skew
+- Serving frameworks: FastAPI/Flask, Seldon, KServe, SageMaker endpoints, TorchServe
 
 **Next:** [CI/CD for ML](11-cicd-ml.md)  
 **Practice:** [Lab 05 - Model Deployment](../mlops-practice/lab-05-model-deployment/)

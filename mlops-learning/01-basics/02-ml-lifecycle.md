@@ -4,6 +4,18 @@
 
 The ML lifecycle is the end-to-end process of developing, deploying, and maintaining machine learning models in production.
 
+## 📖 Understanding the ML Lifecycle (Intuition First)
+
+Think about how a new drug reaches the market. Nobody synthesizes a compound on Monday and sells it at the pharmacy on Tuesday. There's a long, disciplined journey: identify the disease to target, gather patient data, run experiments in the lab, test candidates in trials, get approval, distribute it, and then keep watching for side effects long after it ships. If a problem shows up in the field, you loop back and revise. The ML lifecycle is that same journey for a model — a structured path from "we have a business problem" all the way to "we're watching this model behave in production and improving it."
+
+Why break it into stages at all? Because the biggest failures in ML don't happen during training — they happen at the *seams* between stages. A model can be brilliant but solve the wrong problem (bad problem definition). The data can be perfect in the lab but arrive differently in production (data/serving skew). A model can pass every test and still lose money because nobody connected accuracy to business value. Naming the stages makes these handoffs explicit so they don't get skipped.
+
+The single most important idea here is that the lifecycle is a **loop, not a line**. Traditional software is often "build it, ship it, done." ML is "build it, ship it, watch it degrade, retrain it, ship it again — forever." The final stage (retraining) feeds right back into the earlier stages because the world keeps changing and models go stale. A team that treats ML as a one-time project will be blindsided when their 92% model quietly drifts to 80%.
+
+Each stage also answers a different question with a different kind of rigor. Problem definition asks *"is ML even the right tool, and what does success mean in dollars?"* Data stages ask *"do we have trustworthy inputs?"* Training and evaluation ask *"is this model good enough, and good enough for whom?"* Deployment and monitoring ask *"does it still work where real users are, right now?"* Skipping the business framing at the start is the classic rookie mistake — you end up with a technically impressive model nobody uses.
+
+So the lifecycle isn't bureaucracy; it's a map that keeps a fundamentally uncertain, data-dependent process from drifting off course. Expect to move backward as often as forward: an insight during evaluation might send you back to feature engineering, and a monitoring alert months later might send you all the way back to data collection.
+
 ## ML Lifecycle Stages
 
 ```
@@ -568,6 +580,21 @@ def retrain_model():
     else:
         send_alert("New model failed validation")
 ```
+
+## 🎯 Interview Quick Points
+
+- The ML lifecycle is **end-to-end**: problem definition → data → features → training → evaluation → deployment → monitoring → retraining
+- It's a **loop, not a line** — retraining feeds back into earlier stages because models decay as the world changes
+- **Problem definition comes first** — decide if ML is even appropriate and define success in *business* terms, not just accuracy
+- Define the **cost of false positives vs. false negatives** early; it drives which metric you optimize (precision vs. recall)
+- Most ML failures happen at the **seams between stages** (e.g., training/serving skew), not during training itself
+- **EDA and data quality checks** (missing values, duplicates, outliers, drift) come before any modeling
+- **Feature engineering** often matters more than model choice for real-world performance
+- Evaluation must include **business impact analysis**, not just statistical metrics — tie predictions to dollars saved/lost
+- Deployment has multiple patterns: **real-time REST API** vs. **batch prediction**, chosen by latency needs
+- **Monitoring** watches for performance degradation and data drift; it decides *when* to loop back and retrain
+- **Retraining triggers**: performance drop below threshold, detected drift, or a scheduled cadence
+- Expect to **revisit earlier stages** — the process is inherently iterative and data-driven
 
 ## Next Steps
 

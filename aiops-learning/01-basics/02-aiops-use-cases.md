@@ -4,6 +4,18 @@
 
 AIOps solves specific operational challenges across industries. Here are the most common and impactful use cases.
 
+## 📖 Understanding AIOps Use Cases (Intuition First)
+
+Before diving into the code, let's build intuition for *why* these use cases exist and what problem each one solves.
+
+Think of a modern IT system like a large city. There are roads (networks), power lines (infrastructure), traffic (requests), and thousands of buildings (services), all interconnected. When something goes wrong — a power outage, a traffic jam — the effects ripple outward. A single failure downtown can snarl traffic miles away. AIOps use cases are like the different specialists a city hires to keep things running: a traffic controller who spots jams before they form, an investigator who traces a blackout back to the one failed transformer, and a planner who forecasts next year's demand.
+
+Each use case maps to a specific human pain point. **Anomaly detection** exists because no human can stare at thousands of dashboards and notice the one metric quietly drifting off course. **Alert correlation** exists because a single failure often triggers a storm of alarms, and drowning in noise is as dangerous as having no alarms at all. **Root cause analysis** exists because manually tracing a failure through a web of dependencies can eat up hours while customers suffer.
+
+The reason we organize AIOps into use cases (rather than treating it as one big "AI magic box") is practical: each use case can be adopted independently, measured with its own ROI, and matured on its own timeline. You might start with anomaly detection on one critical service, prove it saves detection time, then add correlation, then predictive capacity planning. This incremental path is how real organizations succeed with AIOps.
+
+The common thread across all use cases is the same shift: moving from *humans reacting after the fact* to *systems anticipating and responding automatically*. Whether it's predicting a disk will fill up next week or auto-rolling-back a bad deployment in five minutes, every use case buys back time — the most precious resource during an incident.
+
 ## Use Case 1: Anomaly Detection
 
 ### Challenge
@@ -538,6 +550,21 @@ savings = manual_cost - aiops_cost
 roi = (savings / aiops_platform_cost) * 100
 # = 2643% ROI
 ```
+
+## 🎯 Interview Quick Points
+
+- AIOps use cases each solve a distinct human pain point — adopt them independently, not all at once
+- **Anomaly detection**: ML spots subtle metric drift no human could catch across thousands of dashboards
+- **Alert correlation**: collapses thousands of noisy alerts into a handful of real incidents (often 95% noise reduction)
+- **Predictive analytics / capacity planning**: forecasts issues (disk full, traffic spikes) so you scale *ahead* of demand
+- **Root cause analysis (RCA)**: traces failures through the service dependency graph in minutes instead of hours
+- **Log analysis**: clusters millions of log lines to surface error patterns automatically
+- **Automated remediation**: runbooks auto-fix common incidents (scale, restart, cleanup) and escalate the rest
+- **Change impact analysis**: compares before/after deployment metrics and auto-rolls-back bad releases
+- The recurring theme: shift from **reactive** (humans react after the fact) to **proactive** (systems anticipate and act)
+- Every use case is justified by ROI — measure MTTR reduction, incidents prevented, and engineer-hours saved
+- Best adoption strategy: start with one use case on one critical service, prove value, then expand
+- Industry framing matters: fraud detection (finance), peak traffic (e-commerce), uptime (healthcare) are the same techniques applied to different domains
 
 ## Next Steps
 

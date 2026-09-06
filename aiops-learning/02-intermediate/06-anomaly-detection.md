@@ -4,6 +4,18 @@
 
 Deep dive into anomaly detection techniques for IT operations, covering statistical methods, machine learning algorithms, and production implementation.
 
+## 📖 Understanding Anomaly Detection (Intuition First)
+
+Before the algorithms, let's build intuition for what "anomaly detection" actually means and why it's harder than it sounds.
+
+Think of a seasoned security guard who's worked the same building for years. They don't have a rulebook that says "arrest anyone over 6 feet tall." Instead, they've internalized what *normal* looks like — the rhythm of people arriving at 9am, the delivery truck at noon, the cleaners at night. When something breaks that pattern — a stranger lingering at 3am — it *feels* wrong, even if no explicit rule was broken. Anomaly detection is teaching a machine that same instinct: learn the normal rhythm, then flag whatever doesn't fit.
+
+The crucial insight is that **anomaly detection is almost always unsupervised**. You rarely have a labeled dataset of "here are 10,000 examples of outages." Real outages are (thankfully) rare and each one is a little different. So instead of learning "what does a failure look like?", these techniques learn "what does *normal* look like?" and treat significant deviation as suspicious. That's why nearly every method here — from Z-scores to autoencoders — trains on normal data and measures how far new data strays from it.
+
+There's no single best algorithm, and that's why this chapter covers a spectrum. **Statistical methods** (Z-score, IQR, moving averages) are simple, fast, and explainable — perfect when a metric follows a roughly stable distribution. **Machine learning methods** (Isolation Forest, One-Class SVM, autoencoders) shine when "normal" depends on *combinations* of many metrics at once — high CPU might be fine, but high CPU *with* low traffic is suspicious. **Time-series methods** (LSTM, Prophet) matter when normal itself changes with time — 3am traffic and 3pm traffic are both "normal" but wildly different, so a flat threshold would drown you in false alarms.
+
+Two ideas tie it all together and come up constantly in practice. First, **context is everything**: the same value can be normal or anomalous depending on time of day, day of week, or what other metrics are doing — which is why seasonality and multi-metric correlation exist. Second, **false positives are the silent killer**: an anomaly detector that cries wolf trains operators to ignore it, so ensemble voting, tuned thresholds, and periodic retraining aren't optional polish — they're what make the system trustworthy enough to actually use.
+
 ## Statistical Methods
 
 ### 1. Z-Score Method
@@ -433,6 +445,21 @@ detector = TunedAnomalyDetector()
 detector.fit(X_train)
 anomalies = detector.predict(X_test)
 ```
+
+## 🎯 Interview Quick Points
+
+- Anomaly detection is usually **unsupervised** — you learn what *normal* looks like, not what failures look like
+- Real outages are rare and varied, so you can't train a labeled "failure" classifier — you flag deviation from normal instead
+- **Statistical methods** (Z-score, IQR, moving average bands) are fast, simple, and explainable for stable metrics
+- **Isolation Forest** isolates outliers by random partitioning; great general-purpose, multi-metric detector
+- **One-Class SVM** and **autoencoders** learn a boundary/reconstruction of normal; anomalies reconstruct poorly (high error)
+- **LSTM autoencoders** handle sequential/temporal patterns; **Prophet** handles seasonality (daily/weekly cycles)
+- **Context matters**: the same value can be normal or anomalous depending on time of day, day of week, or other metrics
+- **Multi-metric / correlation** detection catches combinations that individual metrics miss (high CPU + low traffic)
+- **False positives are the silent killer** — alert fatigue makes operators ignore the system
+- Reduce false positives with **ensemble voting** (e.g., 2 of 3 models must agree) and tuned thresholds
+- The **contamination** parameter encodes your expected anomaly fraction — tune it to your data
+- **Retrain periodically** — "normal" drifts over time as systems and traffic evolve
 
 ## Next Steps
 

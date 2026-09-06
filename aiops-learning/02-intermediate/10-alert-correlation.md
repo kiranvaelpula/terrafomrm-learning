@@ -8,6 +8,20 @@
 
 ---
 
+## 📖 Understanding Alert Correlation (Intuition First)
+
+Before the algorithms, let's understand why alert correlation might be the single most impactful AIOps capability for a tired operations team.
+
+Imagine a car where every warning was wired to its own siren, and they all blared at maximum volume the moment anything went slightly off. Low washer fluid? SIREN. Tire pressure 1 PSI low? SIREN. Within a week you'd rip the whole system out — not because the warnings are wrong, but because you can't tell the *important* one from the trivial ones. That's exactly the state of modern monitoring: tens of thousands of alerts a day, 95% of them noise, drowning the handful that actually matter. This is **alert fatigue**, and it's dangerous — teams start ignoring alerts entirely, and the real outage slips through.
+
+The core insight of alert correlation is that **one problem produces many alerts**. A single database slowdown doesn't cause one alert; it causes the database to alert, then the payment service (which depends on it) to alert, then the API gateway, then the frontend. Five, ten, fifty alerts — but *one incident*. Correlation is the art of recognizing that these alerts belong together and collapsing them into a single, understandable incident. Instead of "50 things are broken," the on-call engineer sees "1 incident: database overload, cascading to 5 services."
+
+There are a few complementary ways to decide which alerts "belong together," and the intuition for each is natural. **Time-based correlation** says alerts firing within seconds of each other are probably related — a burst of alarms at 10:00:00 is likely one event, not fifty coincidences. **Topology-based correlation** is smarter: it uses the *service dependency graph* to understand that if the database is failing, alerts from everything downstream of it are expected symptoms, not separate problems. Combine them and you can even point at the likely **root cause** — the most upstream service in the affected chain.
+
+The payoff is enormous and directly measurable. Reducing 10,000 alerts to 50 meaningful incidents isn't just tidier — it restores the team's ability to *trust* their alerts again. When every alert that reaches a human is real and pre-grouped with its context, response gets faster, engineers stop burning out, and the true signal never drowns in the noise. That's why correlation is often the first "wow" moment teams experience when adopting AIOps.
+
+---
+
 ## The Alert Fatigue Problem
 
 Modern systems generate thousands of alerts:
@@ -197,4 +211,19 @@ print(f"Correlated into {len(incidents)} incidents")
 ```
 
 ---
+
+## 🎯 Interview Quick Points
+
+- **Alert fatigue** is the core problem: thousands of alerts/day, ~95% noise, causing teams to ignore alerts
+- The key insight: **one problem produces many alerts** across dependent services
+- Correlation collapses many related alerts into a single, understandable **incident**
+- **Time-based correlation**: alerts firing within a short window are likely the same event
+- **Topology-based correlation**: uses the service **dependency graph** to know downstream alerts are symptoms
+- Topology correlation can identify the likely **root cause** — the most upstream affected service
+- **Blast radius** = the set of downstream services impacted by a failing service
+- **Deduplication** prevents the same alert group from creating multiple incidents
+- Typical impact: 10,000 alerts → ~50 meaningful incidents (huge noise reduction)
+- The real payoff is **restored trust** — every alert reaching a human is real and pre-contextualized
+- Correlation is often the first big "wow" win when adopting AIOps
+- Best results combine time + topology (and often severity/type) rather than any single signal
 

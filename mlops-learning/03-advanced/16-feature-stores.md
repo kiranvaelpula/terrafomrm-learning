@@ -4,6 +4,16 @@
 
 A feature store is a centralized repository for storing, managing, and serving ML features. It solves training-serving skew and enables feature reuse.
 
+## 📖 Understanding Feature Stores (Intuition First)
+
+Imagine a big restaurant where five chefs each independently chop onions their own way, in their own station, with no coordination. Wasteful, inconsistent, and when a dish tastes off nobody knows whose onions were the problem. Now imagine a shared prep kitchen that chops onions once, consistently, and every chef pulls from it. That shared prep kitchen is a feature store: features are computed once, centrally, and reused everywhere — consistently.
+
+The killer problem feature stores solve is **training/serving skew**. During training, a data scientist computes "average purchase over last 30 days" in a pandas notebook. Later, an engineer re-implements that same feature in production serving code — and subtly gets it wrong (different time window, different handling of nulls). Now the model sees features in production that differ from what it trained on, and predictions silently degrade. A feature store guarantees the *exact same* feature computation is used for both training and serving, eliminating this entire class of bug.
+
+The second big win is **reuse**. In a large organization, "customer lifetime value" or "days since last login" gets recomputed by every team building every model — duplicated code, duplicated compute, inconsistent definitions. A feature store lets one team define a feature once, and everyone else discovers and reuses it. It becomes a shared, governed catalog of features, like a library of well-tested functions instead of everyone copy-pasting their own version.
+
+Architecturally, feature stores usually have two halves: an **offline store** (large historical feature values, for training — throughput matters) and an **online store** (low-latency lookups of current feature values, for real-time serving — speed matters). The store keeps them in sync so the feature a model trained on offline is identical to what it fetches online at inference. Tools like **Feast** and **Tecton** provide this. Feature stores are an advanced MLOps component — worth it when you have multiple models, multiple teams, and real training/serving-skew pain.
+
 ## Why Feature Stores?
 
 **Without Feature Store:**
@@ -130,6 +140,19 @@ prediction = model.predict(online_features)
 ✅ Use offline serving for training
 
 ---
+
+## 🎯 Interview Quick Points
+
+- A feature store centralizes computing, storing, and serving ML features
+- Analogy: a shared prep kitchen that chops onions once for all chefs
+- Solves **training/serving skew** — same feature computed identically in training and serving
+- Enables **feature reuse** — define once, discover and reuse across teams/models
+- Two halves: **offline store** (historical, for training) + **online store** (low-latency, for serving)
+- The store keeps offline and online in sync
+- Eliminates duplicated feature code and inconsistent definitions
+- Acts as a governed catalog of features (like a shared, tested function library)
+- Tools: **Feast** (open source), **Tecton** (commercial), SageMaker Feature Store
+- Advanced component — worth it with multiple models/teams and real skew pain
 
 **Next:** [ML on Kubernetes](17-ml-kubernetes.md)  
 **Practice:** [Lab 08 - Feature Store](../mlops-practice/lab-08-feature-store/)

@@ -8,6 +8,18 @@
 
 ---
 
+## 📖 Understanding Feature Engineering (Intuition First)
+
+Imagine you're teaching someone to spot a good used car. If you just hand them raw facts — "manufactured in 2015, odometer reads 140,000, sold three times" — they might miss the point. But if you *transform* those facts into "the car is 9 years old and averages ~15,500 miles per year, which is high," suddenly the pattern is obvious. You didn't add new information; you reshaped what you had into a form that makes the pattern jump out. That's feature engineering: turning raw data into signals a model can actually learn from.
+
+Models are only as good as the features you feed them. A raw timestamp like `2024-06-15T13:04:22` means almost nothing to a model, but "is_weekend," "hour_of_day," and "days_since_signup" carry real predictive power. In practice, thoughtful feature engineering usually beats a fancier algorithm on messy real-world data. The model does the learning, but *you* decide what it gets to learn from.
+
+The reason this chapter is about **pipelines**, not just clever transformations, comes down to a subtle trap. If you engineer features by hand in a notebook — squaring a column here, log-transforming another there — you now have to remember and reproduce that *exact* sequence in production. Miss one step, or apply it in a different order, and your model quietly gets garbage inputs. A pipeline captures the whole transformation chain as reusable code so training and serving stay perfectly in sync.
+
+There's an even sneakier danger called **data leakage**. Any transformation that "learns" something from the data — a scaler's mean, an encoder's categories, an aggregate's averages — must learn it from the *training set only*, then apply that learned state to test and production data. If you fit a scaler on the whole dataset before splitting, information from the test set leaks into training and your accuracy looks amazing in the lab and collapses in production. This is exactly why scikit-learn transformers separate `fit` (learn) from `transform` (apply).
+
+Finally, features are first-class artifacts in MLOps: they should be **versioned, tested, and monitored** just like models and data. A feature store lets teams compute a feature once and reuse it everywhere, guaranteeing training and serving use identical logic. And because the world drifts, you monitor feature distributions in production — if "average income" suddenly shifts three standard deviations, that's an early warning your model is about to degrade.
+
 ## What is Feature Engineering?
 
 Feature engineering transforms raw data into features that better represent patterns for ML models.
@@ -616,6 +628,19 @@ if issues:
 ```
 
 ---
+
+## 🎯 Interview Quick Points
+
+- Feature engineering = transforming raw data into signals a model can learn from (often matters more than model choice)
+- Analogy: reshaping "manufactured 2015, 140k miles" into "9 years old, 15,500 miles/year — high"
+- Build **pipelines**, not ad-hoc transforms, so training and serving use identical logic
+- **Data leakage** is the key danger — fit transformers on training data ONLY, then apply to test/prod
+- This is why scikit-learn separates `fit` (learn state) from `transform` (apply state)
+- Common transforms: time features (hour, is_weekend), aggregations, encodings, interactions
+- Features should be **versioned, tested, and monitored** like models and data
+- A **feature store** computes a feature once and reuses it everywhere (training + serving consistency)
+- Monitor feature distributions in production — a sudden shift is an early warning of drift
+- `sklearn.Pipeline` and custom transformers make feature logic reproducible and portable
 
 ## Summary
 

@@ -4,6 +4,18 @@
 
 Automated Root Cause Analysis uses AI to quickly identify the underlying cause of incidents by analyzing dependencies, timelines, metrics, and logs.
 
+## 📖 Understanding Root Cause Analysis (Intuition First)
+
+Before the algorithms, let's build the intuition for what root cause analysis really is and why it's so hard to do by hand.
+
+Picture a row of dominoes. When the last one falls, that's the *symptom* everyone notices — "the website is down!" But the last domino didn't fall on its own; something tipped the very first one, and each knocked over the next. Root cause analysis is the detective work of running back down that chain to find the *first* domino. The trap is that the loudest, most visible failure is almost never the real cause — it's just the last thing to fall.
+
+This is exactly why incidents are confusing. When a database gets overloaded, it doesn't send you a single tidy alert. Instead, the payment API times out, the API gateway throws 503s, the queue backs up, and error rates spike everywhere. You get a storm of alarms all screaming at once, and each team swears *their* service is the problem. A human investigating this manually has to mentally reconstruct the dependency chain and the timeline — which is why traditional RCA takes hours.
+
+AI-powered RCA attacks this from several complementary angles, and the intuition for each is simple. **Dependency analysis** asks "which service do all the others rely on?" — because a failure in a shared foundation (like the database) explains failures everywhere above it. **Timeline analysis** asks "what broke *first*?" — because the first domino to fall is usually the culprit. **Metrics correlation** asks "which measurement moved together with the symptom?" — a latency spike that perfectly tracks a jump in DB connections points straight at the database. **Log analysis** hunts for the earliest error message, and **ML-based RCA** learns from past incidents to recognize familiar failure signatures.
+
+The most important idea in this chapter is that **no single method is trustworthy alone** — each can be fooled. Timeline analysis can be misled by clock skew; correlation isn't causation; a shared dependency might be a coincidence. That's why a mature RCA engine *combines* all of them and looks for agreement, producing a root cause *with a confidence score*. When dependency analysis, the timeline, the logs, and the ML model all point at "database connection pool exhaustion," you can act with confidence — and that's the whole payoff: cutting resolution from hours of finger-pointing down to minutes of evidence-backed diagnosis.
+
 ## RCA Fundamentals
 
 ### Traditional RCA vs AI-Powered RCA
@@ -543,6 +555,21 @@ for key, value in result['evidence'].items():
 5. **Learn from History**: Use ML on past incidents
 6. **Confidence Scores**: Always provide confidence levels
 7. **Human Validation**: Keep humans in the loop initially
+
+## 🎯 Interview Quick Points
+
+- The symptom you notice (last domino) is rarely the root cause (first domino) — RCA traces the chain backward
+- One failure often triggers a **storm of alerts** across dependent services (cascading failure)
+- Traditional manual RCA takes hours; AI-powered RCA aims for minutes
+- **Dependency analysis**: find the shared service everything else relies on — failures there explain the rest
+- **Timeline analysis**: the event that broke *first* is usually the culprit (watch for clock skew)
+- **Metrics correlation**: a measurement that moves in lockstep with the symptom is a prime suspect (but correlation ≠ causation)
+- **Log-based RCA**: hunt for the earliest error message in the incident window
+- **ML-based RCA**: learns from historical incidents to recognize known failure signatures
+- **No single method is reliable alone** — combine them and look for agreement
+- A mature RCA engine **synthesizes multiple sources** (voting/weighting) and outputs a **confidence score**
+- Always analyze a window **before and after** the incident, not just the moment it fired
+- **Keep humans in the loop** early; use RCA output as a strong hypothesis, not gospel
 
 ## Next Steps
 
