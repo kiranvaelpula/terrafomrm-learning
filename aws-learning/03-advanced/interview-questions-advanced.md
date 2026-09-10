@@ -1339,9 +1339,68 @@ Only use if queries are infrequent
 
 ---
 
+## Data, Orchestration & Edge
+
+### Q12: When would you choose DynamoDB over RDS?
+
+**Answer:**
+Choose based on access patterns and scale:
+
+**DynamoDB (NoSQL)** when you need:
+- Massive scale with predictable single-digit-ms latency
+- Simple key-based access (get by ID, query by partition + sort key)
+- Serverless (no instances to manage), flexible schema
+- Use cases: sessions, shopping carts, IoT data, leaderboards, high-write workloads
+
+**RDS/Aurora (relational)** when you need:
+- Complex ad-hoc queries, JOINs across many entities
+- ACID transactions across relationships, strong relational integrity
+- Reporting and analytical queries
+
+Key point: DynamoDB requires you to **design around access patterns upfront** (no JOINs, avoid Scans). Choose a **high-cardinality partition key** to avoid hot partitions.
+
+---
+
+### Q13: When would you use Step Functions vs chaining Lambda functions?
+
+**Answer:**
+Use **Step Functions** when coordination complexity justifies it:
+- Multi-step workflows with branching (Choice), parallelism (Parallel), or loops (Map)
+- Long-running processes (up to 1 year) or steps that must pause (human approval via callback pattern)
+- You need built-in retry/catch error handling and visual, per-step observability
+- Durable state management so a failed step retries without restarting the whole flow
+
+Use **chained Lambdas** for simple 1-2 step tasks where orchestration overhead isn't worth it.
+
+Standard workflows (long-running, exactly-once) vs Express (short, high-volume, cheaper).
+
+---
+
+### Q14: How does CloudFront improve performance and security?
+
+**Answer:**
+**Performance:** CloudFront caches content at global **edge locations** near users. A cache HIT serves content instantly from the edge; a MISS fetches from the origin (S3/ALB/EC2), caches it, then serves it. This reduces latency (distance) and offloads traffic from the origin.
+
+**Security:** All traffic flows through CloudFront, providing HTTPS/TLS termination, AWS WAF (block SQLi/XSS/bots at the edge), AWS Shield (DDoS protection), geo-restriction, signed URLs for private content, and Origin Access Control (keeps S3 private — only CloudFront can read it).
+
+Cache static content aggressively; be careful with dynamic/personalized content. Use invalidations after deploys. **CloudFront caches HTTP content; Global Accelerator routes TCP/UDP over the AWS backbone.**
+
+---
+
+### Q15: Explain Secrets Manager vs KMS vs Parameter Store.
+
+**Answer:**
+- **KMS** manages encryption *keys*. It uses envelope encryption (a master key encrypts data keys; the master key never leaves KMS's hardware). It powers encryption at rest across S3, EBS, RDS, DynamoDB, etc.
+- **Secrets Manager** stores *secrets* (DB credentials, API keys), encrypted via KMS. Its killer feature is **automatic rotation** — it can rotate credentials on a schedule via Lambda.
+- **SSM Parameter Store** stores config and simple secrets; cheaper, but **no built-in rotation**.
+
+Rule of thumb: Parameter Store for config/simple secrets (cost-sensitive); Secrets Manager when you need automatic rotation. Never hardcode secrets — fetch them at runtime. All access is audited via CloudTrail.
+
+---
+
 ## Summary
 
-These advanced questions cover real-world AWS scenarios including networking, containers, security, cost optimization, multi-region, and disaster recovery. Master these concepts for senior cloud roles.
+These advanced questions cover real-world AWS scenarios including networking, containers, security, cost optimization, multi-region, disaster recovery, NoSQL (DynamoDB), workflow orchestration (Step Functions), content delivery (CloudFront), and secrets/encryption (Secrets Manager/KMS). Master these concepts for senior cloud roles.
 
 **Key Topics Covered:**
 - Advanced networking (Transit Gateway, PrivateLink)

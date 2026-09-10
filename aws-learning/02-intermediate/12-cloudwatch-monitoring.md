@@ -156,6 +156,147 @@ Install the CloudWatch Agent to collect:
 
 **Common interview point:** CloudWatch = performance/operational monitoring; CloudTrail = API audit trail (governance/security). Don't confuse them.
 
+## CloudWatch Agent — Detailed Setup
+
+The default EC2 metrics are hypervisor-level (CPU, network, disk I/O) but NOT what's happening *inside* the OS (memory, disk usage, processes). The CloudWatch Agent fills that gap.
+
+```bash
+# 1. Install the agent (Amazon Linux)
+sudo yum install -y amazon-cloudwatch-agent
+
+# 2. Configure it (wizard generates a config file)
+sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-config-wizard
+
+# 3. Start the agent with your config
+sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl \
+  -a fetch-config -m ec2 \
+  -c file:/opt/aws/amazon-cloudwatch-agent/etc/config.json -s
+```
+
+```json
+// Example agent config — collect memory, disk, and app logs
+{
+  "metrics": {
+    "metrics_collected": {
+      "mem":  {"measurement": ["mem_used_percent"]},
+      "disk": {"measurement": ["used_percent"], "resources": ["/"]}
+    }
+  },
+  "logs": {
+    "logs_collected": {
+      "files": {
+        "collect_list": [{
+          "file_path": "/var/log/myapp/app.log",
+          "log_group_name": "myapp-logs",
+          "log_stream_name": "{instance_id}"
+        }]
+      }
+    }
+  }
+}
+```
+
+## Logs Insights — More Query Examples
+
+```sql
+-- Count errors by 5-minute buckets
+fields @timestamp, @message
+| filter @message like /ERROR/
+| stats count() as errors by bin(5m)
+| sort @timestamp desc
+
+-- Average latency from a structured (JSON) log field
+fields @timestamp, duration
+| filter ispresent(duration)
+| stats avg(duration), max(duration), pct(duration, 99) by bin(1m)
+
+-- Top 10 slowest requests
+fields @timestamp, url, duration
+| sort duration desc
+| limit 10
+
+-- Find all logs for one request (trace correlation)
+fields @timestamp, @message
+| filter trace_id = "abc-123-def"
+| sort @timestamp asc
+```
+
+## Metric Filters (turn logs into metrics)
+
+```bash
+# Create a metric from a log pattern — count 500 errors in logs,
+# then you can alarm on that metric.
+aws logs put-metric-filter \
+  --log-group-name myapp-logs \
+  --filter-name Count500Errors \
+  --filter-pattern '"HTTP 500"' \
+  --metric-transformations \
+    metricName=Http500Count,metricNamespace=MyApp,metricValue=1
+```
+
+## Dashboards as Code
+
+```python
+import boto3, json
+
+cloudwatch = boto3.client("cloudwatch")
+
+dashboard = {
+    "widgets": [
+        {
+            "type": "metric",
+            "properties": {
+                "title": "ALB Golden Signals",
+                "metrics": [
+                    ["AWS/ApplicationELB", "TargetResponseTime", {"stat": "p99"}],
+                    [".", "RequestCount", {"stat": "Sum"}],
+                    [".", "HTTPCode_Target_5XX_Count", {"stat": "Sum"}],
+                ],
+                "period": 300,
+                "region": "us-east-1",
+            },
+        }
+    ]
+}
+
+cloudwatch.put_dashboard(
+    DashboardName="ProdOverview",
+    DashboardBody=json.dumps(dashboard),
+)
+# Version-control this → reproducible, reviewable dashboards
+```
+
+## CloudWatch Synthetics (Canaries)
+
+```
+Canaries are scripts that run on a schedule to SIMULATE user journeys
+(e.g., "log in, add to cart, checkout") and alert if the flow breaks —
+BEFORE real users hit the problem.
+
+- Catches issues even when there's no traffic
+- Monitors from the user's perspective (end-to-end)
+- Written in Node.js/Python, run on a schedule
+```
+
+## CloudWatch RUM (Real User Monitoring)
+
+```
+RUM collects performance data from REAL users' browsers:
+  - Page load times, JavaScript errors, Core Web Vitals
+  - Broken down by browser, device, geography
+Complements server-side metrics with the actual client experience.
+```
+
+## Anomaly Detection
+
+```
+CloudWatch can learn a metric's normal pattern (including daily/weekly
+cycles) using ML, then alarm when it deviates — instead of a fixed threshold.
+
+Useful when "normal" varies (e.g., high daytime traffic, low at night)
+and a static threshold would either miss issues or false-alarm.
+```
+
 ## Cost Considerations
 
 ```
@@ -164,6 +305,8 @@ Control cost by:
   - Setting log retention (don't keep logs forever)
   - Using metric filters instead of storing everything
   - Consolidating alarms (composite alarms)
+  - Sampling high-volume logs
+  - Using standard-resolution metrics unless you truly need 1-second
 ```
 
 ---
