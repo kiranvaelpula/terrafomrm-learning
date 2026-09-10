@@ -4,6 +4,18 @@
 
 AWS Lambda is a serverless compute service that lets you run code without provisioning or managing servers. You pay only for the compute time you consume, making it ideal for event-driven architectures, microservices, and applications with variable workloads.
 
+## 📖 Understanding Lambda (Intuition First)
+
+Think about the difference between owning a car and taking a taxi. With a car, you pay for it whether you drive it or not — insurance, parking, depreciation, it just sits in the driveway costing money. A taxi is different: it appears exactly when you need a ride, you pay only for that trip, and when you step out it's gone — no parking, no upkeep, no idle cost. An EC2 server is the car (always running, always billing). Lambda is the taxi: your code runs only when something triggers it, you pay per execution measured in milliseconds, and there's nothing to keep running or maintain in between.
+
+Why does "serverless" exist? Because for huge classes of work, keeping a server running 24/7 is wasteful and annoying. If a function runs when a file is uploaded, or when an API is called, or once an hour — why pay for a full-time server that's idle 99% of the time? And beyond cost, someone has to patch, secure, and scale that server. Lambda removes all of it. You hand AWS a function; AWS runs it on demand, scales it automatically from zero to thousands of concurrent copies, and charges you only for the actual compute used. The servers still exist — you just never see or manage them, hence "serverless."
+
+The mental model is **event-driven**. Lambda functions don't sit around waiting in a loop; they sleep until an *event* wakes them. An event might be an S3 upload, an API Gateway request, a message on a queue, a database change, or a scheduled timer. The event gets passed into your function as input, your code runs, returns a result, and then the function goes back to sleep. This is why Lambda is the glue of modern AWS architectures — it lets different services react to each other without you running any always-on plumbing.
+
+There are trade-offs worth knowing. Because functions spin up on demand, the first invocation after idle can have a small startup delay called a **cold start**. Functions are also **stateless** and time-limited (max 15 minutes), so they're perfect for short, self-contained tasks but not long-running processes — persistent state goes in a database or S3, not in the function's memory. And like everything in AWS, a Lambda needs an **IAM execution role** granting it exactly the permissions it needs (least privilege).
+
+A couple of supporting pieces round it out. **Layers** let you package shared libraries or dependencies separately so multiple functions can reuse them without bloating each deployment. **Environment variables** externalize config so you don't hard-code settings. And Lambda can run **inside a VPC** when it needs private access to resources like a database. Once you picture Lambda as "a taxi for code — summoned by an event, paid by the millisecond, gone when finished," the triggers, roles, cold starts, and stateless design all follow naturally.
+
 ## Table of Contents
 - [What is Lambda?](#what-is-lambda)
 - [Lambda Fundamentals](#lambda-fundamentals)
@@ -1437,6 +1449,21 @@ Monitoring:
 ```
 
 ---
+
+## 🎯 Interview Quick Points
+
+- **Lambda runs code without managing servers** — pay per invocation and compute time (billed in ms)
+- **Event-driven**: functions are triggered by S3, API Gateway, SQS/SNS, DynamoDB Streams, EventBridge, schedules, and more
+- **Automatic scaling** from zero to thousands of concurrent executions — no capacity planning
+- Functions are **stateless** and have a **15-minute max timeout** — best for short, self-contained tasks
+- **Cold start** = latency on the first invocation after idle; mitigate with provisioned concurrency
+- Each function needs an **IAM execution role** with least-privilege permissions
+- **Layers** package shared code/dependencies for reuse across functions
+- **Environment variables** externalize configuration; sensitive values should use Secrets Manager/SSM
+- Put Lambda **in a VPC** only when it needs private resource access (adds ENI setup considerations)
+- Configure **memory** (which also scales CPU) to balance performance vs cost
+- Handle failures with **retries, dead-letter queues (DLQ), and destinations**
+- Ideal for **event processing, APIs, automation, and glue between services**; not ideal for long-running or highly stateful workloads
 
 ## Summary
 
