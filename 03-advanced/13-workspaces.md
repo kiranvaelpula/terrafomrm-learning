@@ -29,6 +29,20 @@ my-infrastructure/
 
 ---
 
+## 📖 Understanding Workspaces (Intuition First)
+
+A Terraform workspace is like having one set of blueprints but building several separate copies of the house from it — one for dev, one for staging, one for prod — where each copy keeps its own record of what got built. The *code* is shared, but each workspace has its own independent state file. Switching workspaces is like switching which house you're currently working on, so an apply in "dev" touches only the dev copy.
+
+The reason workspaces exist is to avoid duplicating an entire configuration just to spin up a near-identical environment. If dev and prod are the same shape with different sizes, copying all the `.tf` files into separate folders means every future change has to be made in every folder — tedious and error-prone. Workspaces let you keep the code in one place and use `terraform.workspace` to vary the details (instance sizes, counts, whether monitoring is on).
+
+The key mental hook is that workspaces isolate *state*, not *code*. Inside your configuration you can read `terraform.workspace` to make decisions — a bigger instance type in prod, an extra database only in prod, workspace-tagged resource names. This keeps environments consistent in structure while differing in scale.
+
+Workspaces have an important limitation to understand: because all environments share the same code, they're best when environments are genuinely similar. If dev and prod need *fundamentally different* architectures, separate directories (with their own files and backends) give stronger isolation and flexibility. That's the classic tradeoff — workspaces favor DRY and convenience; separate directories favor isolation and independence.
+
+The most common gotcha is applying to the wrong workspace, which is why checking `terraform workspace show` before an apply, naming workspaces clearly, and guarding production in CI/CD all matter. And a strong recommendation: don't use the `default` workspace for production — an accidental apply in `default` is a classic way to damage prod. Used with discipline, workspaces are a clean way to manage multiple similar environments from a single, DRY configuration.
+
+---
+
 ## 🔧 Workspace Commands
 
 ### Basic Commands
@@ -745,6 +759,21 @@ Create a multi-workspace setup with:
 6. Proper tagging with workspace name
 
 ---
+
+## 🎯 Interview Quick Points
+
+- A **workspace** runs the same config with a **separate state file** per environment
+- Workspaces **isolate state, not code** — all workspaces share the same `.tf` files
+- Manage them with **`workspace new/select/list/show/delete`**
+- Reference the active workspace in code via **`terraform.workspace`**
+- Common pattern: **maps keyed by workspace** for per-environment instance types/counts
+- Combine with **conditionals** to create resources only in certain environments
+- With S3, workspace states live under a **`workspace_key_prefix`** path
+- **Workspaces vs separate directories**: workspaces = DRY/convenient; directories = stronger isolation
+- Use **separate directories** when environments need fundamentally different architectures
+- **Never use the `default` workspace for production** — accidental applies are dangerous
+- Always **`terraform workspace show`** before applying to avoid hitting the wrong environment
+- Include the workspace name in **resource names/tags** for clarity and safety
 
 ## ⏭️ Next Steps
 

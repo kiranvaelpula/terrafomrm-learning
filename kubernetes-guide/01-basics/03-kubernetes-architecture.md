@@ -47,6 +47,20 @@
 
 ---
 
+## 📖 Understanding Kubernetes Architecture (Intuition First)
+
+Picture a large hotel. Guests (your applications) need rooms, room service, and a working front desk. The hotel splits into two worlds: the **management office** that makes all the decisions (bookings, staff assignments, keeping records) and the **guest floors** where the actual rooms and services live. Kubernetes is built the exact same way — the **control plane** is the management office, and the **worker nodes** are the guest floors where your containers actually run.
+
+The single most important idea is that **everything flows through the API server**. Just like every request at the hotel goes through the front desk, no component in Kubernetes talks directly to another. kubectl, the scheduler, the controllers, and the node agents all communicate by reading from and writing to the API server. This central hub design keeps the system consistent and secure, because there's one gatekeeper validating and recording every change.
+
+Behind the front desk sits **etcd**, the hotel's master ledger. It's a distributed key-value database that holds the *entire* desired and current state of the cluster — every pod, service, secret, and config. If etcd is the source of truth, the API server is the only one allowed to write in it. This is why backing up etcd is critical: lose the ledger and you lose the cluster's memory.
+
+The rest of the control plane are decision-makers reacting to that ledger. The **scheduler** is like the room-assignment clerk deciding which floor (node) has space for a new guest (pod). The **controllers** are tireless supervisors running the reconciliation loop — constantly comparing "what should exist" against "what actually exists" and nudging reality back toward the desired state. Asked for 3 replicas but only 2 are running? A controller notices the gap and creates the third.
+
+On each worker node, the **kubelet** is the floor manager that actually starts and babysits containers, **kube-proxy** wires up the networking so guests can reach each other, and the **container runtime** (like containerd) does the literal work of running containers. Understanding this split — brains in the control plane, muscle on the workers, all coordinated through the API server and etcd — is the foundation for debugging almost anything in Kubernetes.
+
+---
+
 ## 🎯 Control Plane Components
 
 The **Control Plane** manages the cluster and makes decisions about scheduling, scaling, and maintaining cluster state.
@@ -646,6 +660,22 @@ Worker Nodes:
   │Work│  │Work│  │Work│ ← N Workers
   └────┘  └────┘  └────┘
 ```
+
+---
+
+## 🎯 Interview Quick Points
+
+- A cluster splits into the **control plane** (makes decisions) and **worker nodes** (run workloads)
+- **API server** is the single front door — all components communicate through it, never directly with each other
+- **etcd** is the distributed key-value store holding the entire cluster state; only the API server writes to it, and it must be backed up
+- **Scheduler** decides which node a new pod runs on, based on resources, affinity, taints/tolerations, and load
+- **Controller Manager** runs controllers that enforce desired state via the **reconciliation loop** (e.g., ReplicaSet keeps N pods alive)
+- **kubelet** is the per-node agent that starts containers, runs health checks, and reports status back
+- **kube-proxy** manages network rules enabling service discovery and load balancing between pods
+- **Container runtime** (containerd, CRI-O) actually runs the containers; Docker as a runtime is deprecated
+- Kubernetes constantly reconciles **current state → desired state** — this self-healing loop is the core mechanism
+- For **high availability**, run an odd number (3+) of control plane and etcd nodes behind a load balancer
+- If the API server goes down you can't make changes, but running pods keep serving; if a node goes down, controllers reschedule its pods elsewhere
 
 ---
 

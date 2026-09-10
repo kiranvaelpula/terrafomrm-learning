@@ -4,6 +4,18 @@
 
 Let's learn all the core Terraform commands with practical examples.
 
+## Understanding Terraform Commands (Intuition First)
+
+Learning Terraform's commands is like learning the controls of a car. A few you touch constantly - key, gas, brake - and a handful of specialized ones you reach for only in particular situations. If you know what each control does and when you'd use it, driving becomes automatic. Here, init, plan, and apply are your everyday controls, while import, state, and workspace are the specialized ones.
+
+Each command answers a different question. init asks "do I have the right tools/plugins for this project?" - it downloads providers and sets up the backend, so you run it first and again whenever providers or modules change. plan asks "what would happen if I ran this?" and apply says "make it so." destroy is the emergency stop that tears everything down.
+
+A family of commands keeps your code healthy: fmt tidies formatting so the whole team's code looks the same, and validate catches syntax errors fast without contacting the cloud. These are cheap pre-checks you run before planning.
+
+Then there are inspection and repair tools. show, output, and state list let you see what currently exists - invaluable for debugging. import brings hand-created resources under Terraform management, and state mv/rm let you carefully rename, move, or remove entries when refactoring. These are powerful and occasionally dangerous, so you reach for them deliberately.
+
+The big picture: most of your day is just plan then apply, with fmt and validate sprinkled in. The rest of the toolkit is for setup, inspection, and rare surgical operations. Knowing which bucket a command falls into tells you how carefully to handle it.
+
 ---
 
 ## 1. terraform init
@@ -541,6 +553,21 @@ terraform state      # Manage state
 ✅ Enable logging when debugging
 
 ---
+
+## Interview Quick Points
+
+- terraform init - download providers/modules, set up the backend (run first)
+- terraform plan - preview changes without applying them
+- terraform apply - make the actual changes to real infrastructure
+- terraform destroy - tear down all managed resources
+- terraform fmt - auto-format code to a consistent style
+- terraform validate - check config validity (fast, no cloud calls)
+- terraform show / output / state list - inspect current state
+- terraform import - bring existing resources under Terraform management
+- terraform state mv/rm - carefully refactor/repair state (use deliberately)
+- Everyday workflow is mostly plan then apply, with fmt/validate as pre-checks
+- Use -target for specific resources; set TF_LOG for debugging
+- Always review the plan output before apply - especially destroys/replacements
 
 ## Next Steps
 

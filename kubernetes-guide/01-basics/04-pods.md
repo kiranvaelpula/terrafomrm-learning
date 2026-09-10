@@ -29,6 +29,20 @@ Containers = Roommates
   ✅ Own belongings (files)
 ```
 
+---
+
+## 📖 Understanding Pods (Intuition First)
+
+Newcomers often assume Kubernetes runs containers directly — but it doesn't. It runs **Pods**, and a Pod is a thin wrapper around one or more containers. Why the extra layer? Because sometimes a few containers are so tightly coupled that they need to live together, like roommates sharing one apartment. They share the same address (IP), the same utilities (network), and the same kitchen (storage volumes). Kubernetes treats that whole apartment as a single unit — it schedules them onto the same node, starts them together, and tears them down together.
+
+Most Pods have just one container, and that's perfectly normal. The multi-container case exists for helper patterns: a "sidecar" container that ships logs, an "ambassador" that proxies network calls, or an "adapter" that reformats data. The rule of thumb is that containers belong in the same Pod only if they genuinely can't function apart. If they can scale or fail independently, they should be separate Pods.
+
+A crucial mental model is that **Pods are disposable and mortal**. You almost never create bare Pods directly in production. Instead, higher-level controllers like Deployments create Pods for you, and when a Pod dies, it isn't resurrected — a brand new one with a new name and new IP takes its place. This is why you shouldn't store important state inside a Pod's local filesystem, and why you reach Pods through Services rather than by their fleeting IP addresses.
+
+To keep Pods healthy, Kubernetes uses **probes**. A liveness probe asks "is this container still alive?" and restarts it if not — like checking a patient's pulse. A readiness probe asks "is it ready to receive traffic yet?" and holds back requests until the answer is yes — like a shop flipping its sign from "closed" to "open." A startup probe gives slow-booting apps extra grace time before the other probes kick in. These checks are what let Kubernetes self-heal without human babysitting.
+
+Finally, **resource requests and limits** are how you tell Kubernetes how hungry your Pod is. Requests are the minimum the scheduler guarantees when placing the Pod; limits are the ceiling it's allowed to consume. Exceed a CPU limit and you get throttled; exceed a memory limit and the container gets killed (OOMKilled). Getting these right is central to both stability and efficient use of your cluster.
+
 ### Visual Representation
 ```
 ┌────────────────────────────┐
@@ -690,6 +704,23 @@ kubectl delete pods --all
 - Create a multi-container pod with nginx + busybox
 - Make them share a volume
 - Have busybox write logs that nginx serves
+
+---
+
+## 🎯 Interview Quick Points
+
+- A **Pod** is the smallest deployable unit in Kubernetes — a wrapper around one or more containers
+- Containers in a Pod **share the network (one IP), storage volumes, and IPC**, and are always scheduled together
+- Most Pods have one container; use multi-container Pods only for tightly coupled helpers (**sidecar, ambassador, adapter** patterns)
+- Pods are **ephemeral and disposable** — when one dies it's replaced by a new Pod with a new name/IP, not restarted in place
+- In production you rarely create bare Pods; **controllers like Deployments** manage them for you
+- **Liveness probe** → restarts a container if it's unhealthy; **readiness probe** → controls whether it receives traffic
+- **Startup probe** gives slow-starting apps time before liveness/readiness checks apply
+- **Requests** are guaranteed minimums used for scheduling; **limits** are hard ceilings
+- Exceeding a CPU limit causes **throttling**; exceeding a memory limit causes **OOMKilled**
+- Common failure states: **ImagePullBackOff** (bad image/tag), **CrashLoopBackOff** (app keeps crashing), **Pending** (no schedulable node/resources)
+- `kubectl describe pod` and `kubectl logs --previous` are the go-to debugging commands
+- CPU is measured in millicores (1000m = 1 CPU); memory in Mi/Gi
 
 ---
 

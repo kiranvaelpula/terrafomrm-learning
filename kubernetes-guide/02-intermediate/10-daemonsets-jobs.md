@@ -19,6 +19,18 @@ Add Node 4 → automatically gets [fluentd pod]
 Remove Node 2 → pod is removed
 ```
 
+## 📖 Understanding DaemonSets, Jobs & CronJobs (Intuition First)
+
+Most Kubernetes workloads answer the question "how many copies do I want?" — but these three controllers answer very different questions, and that's the key to understanding them.
+
+A **DaemonSet** answers "run one copy on *every* machine." The intuition is infrastructure that has to be physically present on each node to do its job — a log collector that reads each node's local log files, a metrics agent that measures that specific node's CPU and memory, or a network plugin that wires up that node's traffic. You can't collect a node's logs from somewhere else; you have to be *on* it. So instead of picking a replica count, you let Kubernetes guarantee exactly one Pod per node, and it automatically adds a Pod when a new node joins the cluster — like corporate IT auto-installing antivirus on every new laptop.
+
+A **Job** answers "run this task until it *finishes*, then stop." This flips the normal Kubernetes assumption. A Deployment tries to keep Pods running forever and restarts them if they exit — which is exactly wrong for a one-time task like a database migration or a batch of image processing. A Job runs the work to completion and considers success as "the process exited cleanly." It adds batch superpowers: `completions` (how many successful runs you need) and `parallelism` (how many can run at once), plus `backoffLimit` for retries. Think of a Deployment as a waiter who's always on shift, versus a Job as a courier who delivers a package and is done.
+
+A **CronJob** answers "run a Job on a *schedule*." It's simply the Kubernetes version of Linux cron — nightly backups, hourly reports, weekly cleanups. It creates a fresh Job each time the schedule fires, using the familiar five-field cron syntax. The important extra knob is `concurrencyPolicy`, which decides what happens if a previous run is still going: `Forbid` skips the new one, `Replace` cancels the old one, `Allow` runs them in parallel.
+
+The unifying idea: pick your controller by the *shape* of the work, not just the app. Continuous per-node infrastructure → DaemonSet. Run-to-completion batch tasks → Job. Recurring scheduled tasks → CronJob. Long-running services → Deployment.
+
 ### When to Use DaemonSet vs Deployment
 
 | Use DaemonSet when... | Use Deployment when... |
@@ -427,6 +439,22 @@ kubectl describe cronjob database-backup
 # Manually trigger a CronJob (create job from it)
 kubectl create job --from=cronjob/database-backup manual-backup-now
 ```
+
+---
+
+## 🎯 Interview Quick Points
+
+- **DaemonSet** runs exactly one Pod per node and auto-schedules on new nodes — used for logging, monitoring, and networking agents
+- Common DaemonSets: Fluentd/Filebeat, Prometheus Node Exporter, CNI plugins (Calico/Cilium), kube-proxy, CSI node drivers
+- Use `nodeSelector`/tolerations to run a DaemonSet only on specific nodes (e.g., GPU nodes)
+- **Job** runs a task to completion then stops; `restartPolicy` must be `Never` or `OnFailure` (not `Always`)
+- Job batch controls: **completions** (total successes needed), **parallelism** (concurrent Pods), **backoffLimit** (retries)
+- **CronJob** creates Jobs on a schedule using standard 5-field cron syntax
+- CronJob **concurrencyPolicy**: `Forbid` (skip overlap), `Replace` (kill old), `Allow` (run in parallel)
+- `successfulJobsHistoryLimit` / `failedJobsHistoryLimit` control how many past Jobs are retained
+- DaemonSet update strategies: **RollingUpdate** (auto, node-by-node) vs **OnDelete** (manual control)
+- Manually trigger a CronJob with `kubectl create job --from=cronjob/<name>`
+- Pick by workload shape: per-node infra → DaemonSet, run-to-completion → Job, scheduled → CronJob, long-running service → Deployment
 
 ---
 

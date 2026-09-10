@@ -17,6 +17,20 @@
 
 ---
 
+## 📖 Understanding Volumes & Storage (Intuition First)
+
+Containers were designed to be disposable — you can throw one away and start a fresh copy at any moment. That's wonderful for stateless apps but a disaster for anything that needs to *remember* something, like a database. When a container dies, its internal filesystem vanishes with it, like a whiteboard wiped clean. Volumes exist to give containers a way to write data somewhere that survives the container's death.
+
+The key insight behind Kubernetes storage is a clean **separation of "what I need" from "where it comes from."** Imagine renting storage space: you (the developer) just say "I need a 10GB fast locker" — that request is a **PersistentVolumeClaim (PVC)**. The actual locker in the warehouse is a **PersistentVolume (PV)**, and the *catalog* of locker types available (fast SSD, cheap HDD) is a **StorageClass**. You don't care which physical disk you get, only that your claim is satisfied. This decoupling means developers never hard-code cloud-specific disk details, and the same manifests work across AWS, Azure, or on-prem.
+
+In the old days, an admin manually pre-created PVs and developers claimed them (**static provisioning**). Modern clusters use **dynamic provisioning**: you create a PVC referencing a StorageClass, and Kubernetes automatically calls the cloud to create a real disk and a matching PV on the spot. This is why production almost always uses StorageClasses — no human has to provision storage by hand.
+
+Not all storage needs are the same, which is why there are different **volume types** and **access modes**. An `emptyDir` is scratch space that lives only as long as the Pod — great for temporary caches or sharing files between containers in the same Pod. A PVC-backed volume survives Pod deletion — essential for databases. Access modes describe sharing: `ReadWriteOnce` (one node, typical for databases), `ReadOnlyMany`, and `ReadWriteMany` (shared writable storage across many Pods, like NFS).
+
+Finally, the **reclaim policy** decides what happens to the underlying disk when you delete a claim: `Retain` keeps the data for safety (manual cleanup), while `Delete` tears down the disk automatically. Understanding this trio — PVC (request), PV (actual storage), StorageClass (the provisioner) — plus access modes and reclaim policies, is the mental model that makes all Kubernetes storage click.
+
+---
+
 ## �️ Understanding PV, PVC, and StorageClass
 
 ### The Analogy
@@ -543,6 +557,22 @@ kubectl describe sc <name>
 kubectl edit pvc <name>  # Update storage size
 kubectl get pvc <name> --watch  # Watch resize
 ```
+
+---
+
+## 🎯 Interview Quick Points
+
+- Container filesystems are **ephemeral** — data is lost on restart; **volumes** provide persistence beyond the container lifecycle
+- **PVC** = a developer's storage request; **PV** = the actual storage; **StorageClass** = the provisioner/catalog of storage types
+- This separation lets developers request storage without knowing cloud-specific details (portability + separation of concerns)
+- **Static provisioning** = admin pre-creates PVs; **dynamic provisioning** = StorageClass auto-creates PVs on demand (preferred in production)
+- **emptyDir** = temporary, dies with the Pod (scratch/shared space); **hostPath** = ties a Pod to a node (avoid in production)
+- Access modes: **ReadWriteOnce (RWO)** for databases, **ReadOnlyMany (ROX)**, **ReadWriteMany (RWX)** for shared writable storage
+- Reclaim policies: **Retain** (keep data, manual cleanup), **Delete** (auto-remove disk); **Recycle** is deprecated
+- A PVC's status becomes **Bound** once matched to a PV
+- **volumeBindingMode: WaitForFirstConsumer** delays PV creation until a Pod is scheduled (ensures correct zone placement)
+- **allowVolumeExpansion: true** enables growing a PVC later without recreating it
+- Cloud provisioners use **CSI drivers** (e.g., ebs.csi.aws.com, disk.csi.azure.com, pd.csi.storage.gke.io)
 
 ---
 

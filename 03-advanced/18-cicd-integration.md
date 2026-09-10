@@ -44,6 +44,20 @@ Code Review & Approval
 
 ---
 
+## 📖 Understanding CI/CD Integration (Intuition First)
+
+CI/CD for Terraform is about taking the careful, disciplined workflow you'd do by hand and turning it into an automated assembly line that runs the same way every time. Think of it like a bank's process for moving money: a person doesn't just walk to the vault and change balances on a whim. There's a request, a review, an approval, and a logged transaction. CI/CD gives your infrastructure changes that same trail of review and control, so infrastructure isn't modified by whoever happens to run `apply` on their laptop.
+
+The reason this matters is that manual Terraform is risky and inconsistent. Someone might forget to run `validate`, apply from the wrong branch, use stale credentials, or skip the plan review entirely. An automated pipeline enforces the good workflow — format, validate, scan, plan, review, apply — on *every* change, removing human forgetfulness from the equation and creating an audit trail of who changed what and when.
+
+The single most important pattern is **separating plan from apply**. On a pull request, the pipeline runs `plan` and posts the results for humans to review — this is the "here's exactly what will change" preview attached to the code review. Only after approval and merge to the main branch does the pipeline run `apply`, ideally applying the *exact saved plan* that was reviewed. This guarantees what gets applied is what was approved, with no surprises in between.
+
+Security is woven throughout. Pipelines should use short-lived credentials via OIDC rather than long-lived access keys baked into secrets, restrict production applies to the main branch, require manual approval gates for prod, and scan for accidentally committed secrets. The pipeline runs with powerful permissions, so it must be locked down carefully.
+
+The broader mental model: the pipeline is the *only* thing that touches real infrastructure, and it does so through a repeatable, reviewed, logged process. Whether it's GitHub Actions, GitLab CI, Jenkins, or Terraform Cloud, the concepts are identical — validate early, plan and review before apply, gate production, notify on results, and keep credentials short-lived. Humans propose changes; the pipeline enforces how they land.
+
+---
+
 ## 1️⃣ GitHub Actions
 
 ### Basic Workflow
@@ -808,6 +822,21 @@ Create a complete CI/CD pipeline with:
 7. Rollback capability
 
 ---
+
+## 🎯 Interview Quick Points
+
+- CI/CD **automates the Terraform workflow** (fmt → validate → scan → plan → apply) consistently
+- It removes human error and creates an **audit trail** of infrastructure changes
+- **Separate plan from apply**: plan on PRs for review, apply after merge to main
+- **Apply the exact saved plan** that was reviewed so what ships equals what was approved
+- **Post the plan on the pull request** so reviewers see changes before approval
+- Restrict **applies to the main branch** and **gate production with manual approval**
+- Prefer **OIDC / short-lived credentials** over long-lived access keys in CI
+- **Store plans as artifacts** to pass them from the plan job to the apply job
+- Use a **matrix** or path filters to handle multiple environments
+- **Notify** (e.g., Slack) on success and failure for visibility
+- **Scan for secrets** (TruffleHog) to catch accidental credential commits
+- Concepts are the same across **GitHub Actions, GitLab CI, Jenkins, and Terraform Cloud**
 
 ## ⏭️ Next Steps
 

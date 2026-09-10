@@ -19,6 +19,20 @@ A CRD extends the Kubernetes API so you can manage your own custom objects using
 
 ---
 
+## 📖 Understanding Custom Resources (Intuition First)
+
+Kubernetes ships with a fixed vocabulary of nouns: Pod, Service, Deployment, ConfigMap, and so on. Its real superpower, though, is that this vocabulary is *extensible*. A **Custom Resource Definition (CRD)** lets you teach Kubernetes a brand-new noun — like `Database`, `Certificate`, or `KafkaCluster` — so that from that moment on, `kubectl get databases` works exactly like `kubectl get pods`. You're literally adding new words to the cluster's API.
+
+The cleanest way to think about it is in programming terms. A **CRD is a class** — it defines the *shape* of a new kind of object (what fields it has, what values are valid). A **Custom Resource (CR) is an instance** of that class — an actual `Database` named `my-postgres` with `type: postgres` and `version: 15`. Defining the class doesn't create any behavior; it just makes the type available and stored in etcd.
+
+This is the part that trips people up: **creating a custom resource, by itself, does nothing.** A `Database` object you apply is just structured data sitting in the cluster's database. It won't provision a real PostgreSQL server on its own. Something has to be *watching* for these objects and taking action — that something is a controller or operator (the next module). The CRD provides the vocabulary and storage; the controller provides the muscle.
+
+So why bother? Because it lets you offer a **simplified, declarative interface** to complex systems. Instead of asking developers to hand-write a StatefulSet, a Service, ConfigMaps, Secrets, and backup CronJobs, you let them write a single tidy `Database` resource. All the messy detail is hidden behind your custom type. This is exactly how tools like cert-manager (`Certificate`), Prometheus Operator (`Prometheus`), and Istio (`VirtualService`) present clean, purpose-built APIs on top of Kubernetes.
+
+CRDs also let you enforce guardrails through an **OpenAPI schema**. You can require certain fields, restrict values to an allowed set (only `postgres`, `mysql`, or `mongodb`), and validate formats. Invalid resources get rejected at creation time by the API server itself — catching mistakes early instead of at runtime. Understanding the trio of *CRD (the type), CR (the instance), and controller (the actor)* is the foundation for everything in the operator pattern.
+
+---
+
 ## 📝 Create CRD
 
 This defines a NEW resource type called `Application`. After applying this, anyone can create `Application` objects in the cluster.
@@ -160,6 +174,22 @@ spec:
 | group | API namespace (e.g., `stable.example.com`) |
 | kind | The resource type name used in YAML |
 | scope | `Namespaced` or `Cluster` (affects visibility) |
+
+---
+
+## 🎯 Interview Quick Points
+
+- A **CRD** extends the Kubernetes API with your own resource types, usable via `kubectl` like built-in ones
+- Mental model: **CRD = class (schema), CR = instance (data), Controller/Operator = the actor that does the work**
+- Creating a CR alone **does nothing** — it's just data in etcd until a controller watches and acts on it
+- CRDs enable a **simplified declarative interface** hiding complex underlying resources
+- Naming convention: `plural.group` (e.g., `applications.stable.example.com`); define plural, singular, kind, shortNames
+- **scope** is `Namespaced` or `Cluster`
+- Use an **OpenAPI v3 schema** to validate fields — `required`, `enum`, `pattern`, min/max — rejecting bad resources at creation
+- **Versions** support API evolution; one version is marked `storage: true`
+- Real-world CRDs: cert-manager `Certificate`, Prometheus Operator `Prometheus`, Istio `VirtualService`
+- CRDs are the lightweight alternative to building a full **aggregated API server**
+- Foundational to the **operator pattern** covered next
 
 ---
 

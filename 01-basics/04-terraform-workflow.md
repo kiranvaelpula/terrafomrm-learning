@@ -1,5 +1,19 @@
 # Module 04: Terraform Workflow
 
+## 📖 Understanding the Terraform Workflow (Intuition First)
+
+The Terraform workflow is a lot like renovating a house with a good contractor. First you *write* down what you want changed. Then the contractor walks the house and hands you an estimate: "I'll knock down this wall, add that window, and leave the kitchen alone." Only after you approve the estimate do they pick up the tools and actually do the work. Write, plan, apply — describe, estimate, execute.
+
+The reason this three-step rhythm exists is trust. Infrastructure changes can be expensive or destructive, so you never want a tool to silently do things you didn't expect. The `plan` step is the estimate you review before committing. It tells you in plain terms what will be *added*, *changed*, *destroyed*, or *replaced*, using simple symbols (`+`, `~`, `-`, `-/+`). Reading that estimate is where you catch mistakes — before they hit real systems, not after.
+
+The magic that makes this possible is the *state file*. Terraform keeps a written record of everything it has built, like the contractor keeping the current floor plan of your house. When you change your code, Terraform compares three things: what your code says you want, what the state file says already exists, and what's actually out there. The difference between those is exactly the plan it shows you. Without this memory, Terraform couldn't tell "create something new" apart from "modify something that's already there."
+
+Because Terraform is declarative, mistakes are cheap. Nothing happens until you run `apply`, so a wrong edit is just a wrong draft — fix the code and re-plan. And because Terraform always works toward your described end state, if reality drifts (someone changed a setting by hand), the next apply nudges everything back to match your code.
+
+That's the whole mental model: you keep editing a description of the destination, Terraform keeps a memory of what's real, and every change is previewed as an estimate before it's executed. This is why the workflow feels safe even when managing large, critical systems.
+
+---
+
 ## The Terraform Workflow
 
 Terraform has a simple 3-step workflow that you'll use for every change:
@@ -266,6 +280,21 @@ terraform destroy
 ✅ You can always fix mistakes and reapply
 
 ---
+
+## 🎯 Interview Quick Points
+
+- The core workflow is **Write → Plan → Apply**
+- **Always run `terraform plan` before `apply`** to preview changes
+- Plan symbols: **`+` create, `-` destroy, `~` modify, `-/+` replace** (destroy then recreate)
+- **Nothing changes until you run `apply`** — plans are safe, read-only previews
+- Terraform is **declarative** — you define the desired end state, not the steps
+- **`terraform.tfstate`** stores the current known state of your infrastructure
+- Terraform computes changes by **diffing code vs. state vs. real infrastructure**
+- **Never manually edit or delete `terraform.tfstate`** — it tracks what Terraform manages
+- **Don't commit state to Git** — it can contain sensitive values
+- Mistakes are cheap: **fix the code and re-run plan/apply**; use `destroy` to start fresh
+- `apply -auto-approve` skips confirmation — reserve it for **CI/CD automation**, not manual runs
+- Terraform automatically **refreshes state** during plan/apply to detect drift
 
 ## Next Steps
 

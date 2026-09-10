@@ -33,6 +33,20 @@ env:
 
 ---
 
+## 📖 Understanding ConfigMaps & Secrets (Intuition First)
+
+There's an old software principle called the "twelve-factor app" that says configuration should live *outside* your code, not baked into it. Think about it: if you hard-code the database URL into your container image, you'd need to rebuild and re-ship that image just to point it at a different database for staging versus production. That's slow and error-prone. ConfigMaps and Secrets exist so you can build one image and inject the right settings at runtime — the same jar, wired differently per environment.
+
+**ConfigMaps** hold your non-sensitive settings — log levels, feature flags, API endpoints, whole config files. **Secrets** hold the sensitive stuff — passwords, API keys, TLS certificates, tokens. They behave almost identically; the split exists so Kubernetes (and you) can treat secrets with extra care: restricting who can read them, encrypting them at rest, and keeping them out of logs and version control.
+
+A common misconception trips people up here: **Secrets are only base64-encoded, not encrypted**. Base64 is just reversible text formatting, not security — anyone who can read the Secret can decode it in one command. Real protection comes from enabling encryption at rest in etcd, locking down access with RBAC, and ideally sourcing secrets from an external manager like Vault or AWS Secrets Manager. Treat "it's in a Secret" as "it's labeled sensitive," not "it's safe."
+
+You can consume both in two ways, and the choice matters. As **environment variables**, values are read once when the container starts — so updating the ConfigMap does *not* change a running Pod; you must restart it. As **mounted volumes** (files), Kubernetes updates the files on disk automatically a short time after you change the source, so an app that watches its config file can pick up changes without a restart. Environment variables are simpler; volume mounts are better for large config files and live reloads.
+
+The big-picture reason this matters: separating config from code is what lets the same artifact flow safely through dev, staging, and prod, keeps secrets out of your Git history, and makes rotating a leaked password a config change rather than a rebuild.
+
+---
+
 ## 📋 ConfigMaps
 
 **ConfigMaps** store non-sensitive configuration data as key-value pairs.
@@ -721,6 +735,22 @@ kubectl get secret <name> -o jsonpath='{.data.key}' | base64 --decode
 - Set up automatic secret rotation
 - Integrate with external secret manager
 - Implement RBAC for secrets
+
+---
+
+## 🎯 Interview Quick Points
+
+- ConfigMaps and Secrets **externalize configuration** so one image runs in any environment (a twelve-factor principle)
+- **ConfigMap** = non-sensitive config (log levels, endpoints, config files); **Secret** = sensitive data (passwords, keys, certs)
+- **Secrets are base64-encoded, NOT encrypted** — base64 is trivially reversible; real security needs encryption at rest + RBAC
+- Enable **encryption at rest** for etcd and restrict Secret access with RBAC in production
+- Consume both as **environment variables** (read once at startup) or **volume mounts** (files on disk)
+- Env vars do **not** update in a running Pod — you must restart (`kubectl rollout restart`) after changing a ConfigMap/Secret
+- **Mounted volumes auto-update** the files after ~1 minute, so apps that reload config can pick up changes without restart
+- `stringData` lets you write Secret values in plain text (auto-encoded); `data` requires base64
+- Secret types include **Opaque** (default), **kubernetes.io/tls**, and **kubernetes.io/dockerconfigjson** (for private registry pulls via `imagePullSecrets`)
+- Both have a **1MB size limit** and are namespaced
+- Never commit secrets to Git; prefer external managers (Vault, AWS Secrets Manager, Azure Key Vault) and rotate regularly
 
 ---
 

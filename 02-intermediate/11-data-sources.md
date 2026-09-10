@@ -24,6 +24,20 @@ A **data source** allows Terraform to fetch or compute data from external source
 
 ---
 
+## 📖 Understanding Data Sources (Intuition First)
+
+If a resource is something Terraform *builds and owns*, a data source is something Terraform *looks up and reads*. Imagine you're moving into an existing office building. You don't rebuild the electrical grid or the street outside — you just need to *find out* the address, the power specs, and where the existing network jacks are, so your new furniture plugs in correctly. Data sources are how Terraform asks those questions about infrastructure that already exists.
+
+The reason this matters is that no real environment is 100% managed by a single Terraform configuration. There are shared VPCs another team owns, AMIs that Amazon publishes and updates, account IDs, availability zones, DNS zones. Hardcoding those values is brittle — the "latest" AMI changes weekly, and copying an ID by hand invites typos and drift. A data source fetches the current, correct value at plan time, so your config stays accurate without manual updates.
+
+The key mental distinction from resources: **data sources are read-only**. They never create, change, or destroy anything. They just query and return attributes you can then wire into your resources — for example, "give me the newest Amazon Linux AMI" feeding straight into an EC2 instance's `ami` argument. This keeps a clean line between what Terraform *owns* and what it merely *references*.
+
+Data sources also shine at connecting separate Terraform configurations. The `terraform_remote_state` data source lets one project read the outputs of another — so your app layer can look up the VPC and subnet IDs the networking layer created, without duplicating that logic. This is how large systems get split into independent, loosely coupled state files that still work together.
+
+Good practice is to filter data sources tightly (enough criteria to match exactly one thing) because a query that returns zero or many results is an error. Think of it like a precise database `WHERE` clause. Used well, data sources make your configuration dynamic and self-updating instead of a pile of hardcoded IDs.
+
+---
+
 ## 📖 Data Source Syntax
 
 ### Basic Syntax
@@ -777,6 +791,21 @@ Create a Terraform configuration that:
 - [Remote State Data Source](https://www.terraform.io/docs/language/state/remote-state-data.html)
 
 ---
+
+## 🎯 Interview Quick Points
+
+- A **data source reads existing information**; a resource creates/manages infrastructure
+- Data sources are **read-only** — they never create, modify, or destroy anything
+- Syntax: **`data "<type>" "<name>" { ... }`**; reference with **`data.<type>.<name>.<attr>`**
+- Common uses: latest **AMI**, **availability zones**, **caller identity/account ID**, existing **VPC/subnets**
+- Data sources avoid **hardcoding IDs** — they fetch the current correct value at plan time
+- **Filter tightly** — a query returning zero or multiple results errors out
+- Use **`for_each`/`count`** with data sources for dynamic, conditional lookups
+- **`terraform_remote_state`** reads another configuration's outputs to link separate state files
+- Data sources can be **chained** (query a VPC, then its subnets, then each subnet's details)
+- Combine with **conditionals** to use an existing resource or create a new one
+- They make configs **dynamic and self-updating** instead of full of stale hardcoded values
+- `aws_iam_policy_document` is a data source that **builds JSON policies** cleanly
 
 ## ⏭️ Next Steps
 

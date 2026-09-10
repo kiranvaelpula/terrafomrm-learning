@@ -24,6 +24,20 @@ Total: 1 LoadBalancer = ~$15/month
 
 ---
 
+## 📖 Understanding Ingress (Intuition First)
+
+Imagine a large office building with dozens of companies inside. You could give each company its own street entrance with its own security desk — but that's wildly expensive and confusing for visitors. Instead, buildings have one main lobby with a single receptionist who reads the visitor's request ("I'm here for Acme Corp on floor 3") and directs them to the right place. **Ingress is that shared lobby and receptionist for your cluster's HTTP traffic.** One entry point, smart routing to many internal services.
+
+The reason Ingress exists is cost and manageability. Without it, every service you want to expose to the internet needs its own cloud LoadBalancer — and each one is a separate public IP and a separate monthly bill. Ten services means ten load balancers. Ingress collapses that into a single load balancer that fans out to many services based on rules, so you pay for one entry point and manage routing declaratively in YAML.
+
+The single most important thing to grasp is that Ingress has **two separate parts that both must exist**. The **Ingress Resource** is just the rulebook — the YAML that says "api.example.com goes to the api-service." But rules on their own do nothing; they need something to actually enforce them. That's the **Ingress Controller** — a real running proxy (NGINX, Traefik, HAProxy, or a cloud ALB) that reads your rules and configures itself to route traffic accordingly. Beginners are often confused when their Ingress "doesn't work" — usually because they wrote the rules but never installed a controller.
+
+Ingress routes traffic in two main ways. **Host-based routing** sends different domains to different services (`api.example.com` vs `www.example.com`) — ideal when each app has its own subdomain. **Path-based routing** sends different URL paths on the same domain to different services (`/api` vs `/web`) — common in microservice frontends. You can mix both.
+
+Ingress is also the natural place to terminate **TLS/HTTPS**. Rather than every service handling its own certificates, the Ingress Controller decrypts HTTPS at the edge using a certificate stored in a Secret, and tools like **cert-manager** can automatically fetch and renew free Let's Encrypt certificates. Note that Ingress is specifically for HTTP/HTTPS (Layer 7) traffic — for raw TCP/UDP you'd still use a LoadBalancer Service.
+
+---
+
 ## Two Parts: Ingress Resource + Ingress Controller
 
 **Ingress Resource** = the routing rules (YAML you write)
@@ -405,6 +419,23 @@ curl -H "Host: myapp.example.com" http://<LoadBalancer-IP>/
 kubectl get secret app-tls-cert
 kubectl describe certificate myapp-tls   # If using cert-manager
 ```
+
+---
+
+## 🎯 Interview Quick Points
+
+- **Ingress** exposes HTTP/HTTPS services through a single entry point with host- and path-based routing rules
+- It saves money: one LoadBalancer fans out to many services instead of one LoadBalancer per service
+- Requires **two parts**: the **Ingress Resource** (rules) AND an **Ingress Controller** (NGINX/Traefik/ALB) that enforces them — rules alone do nothing
+- **Host-based routing** = different domains to different services; **path-based routing** = different paths on one domain
+- **pathType**: `Prefix` matches a path and everything under it; `Exact` matches only the exact path
+- Ingress terminates **TLS/HTTPS** at the edge using a certificate stored in a Secret (`tls` block)
+- **cert-manager** automates free Let's Encrypt certificates and auto-renews them
+- Ingress is **Layer 7 (HTTP/HTTPS only)** — use a LoadBalancer Service for raw TCP/UDP
+- Controller behavior (rewrites, rate limits, auth, CORS, body size) is configured via **annotations**
+- `ingressClassName` selects which controller handles a given Ingress resource
+- Popular controllers: NGINX (default choice), Traefik (built-in Let's Encrypt), AWS ALB (native cloud integration), Istio Gateway (service mesh)
+- Debug flow: check the Ingress resource, then the controller logs, then confirm the controller's LoadBalancer has an external IP
 
 ---
 

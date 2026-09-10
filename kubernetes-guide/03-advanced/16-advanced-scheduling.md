@@ -1,5 +1,19 @@
 # Module 16: Advanced Scheduling
 
+## 📖 Understanding Advanced Scheduling (Intuition First)
+
+By default, the Kubernetes scheduler is like a hotel clerk who just puts each guest in whatever room happens to be free. That's fine most of the time, but sometimes you have specific needs: a guest who requires a ground-floor room, two colleagues who want adjacent rooms, or a VIP who must never be bumped. Advanced scheduling is the set of tools that let you give the scheduler these instructions instead of leaving placement to chance.
+
+The tools split neatly by *who is expressing the preference*. **Affinity** is the pod speaking: "I *want* to go somewhere." **Node affinity** lets a pod demand or prefer certain node types ("put me on an SSD node" or "prefer zone us-east-1a"). **Pod affinity** lets a pod ask to sit near other pods ("keep me on the same node as the cache for low latency"), while **pod anti-affinity** asks for the opposite ("spread my replicas across different nodes so one failure doesn't take them all down"). Anti-affinity is one of the most important high-availability tools you have.
+
+Every affinity rule comes in two strengths, and the distinction is crucial. **Required** (`requiredDuringScheduling...`) is a hard constraint — no matching node, no scheduling; the pod stays Pending. **Preferred** is a soft wish with a weight — the scheduler tries its best but will place the pod elsewhere rather than leave it stuck. Choosing between them is really choosing between "this must happen" and "this would be nice."
+
+**Taints and tolerations** flip the perspective: now the *node* is speaking. A taint is a node saying "keep out unless you have a pass." A toleration is the pass a pod carries to be allowed in. This is how you reserve GPU nodes for GPU workloads, dedicate nodes to a team, or cordon a node for maintenance (a `NoExecute` taint even evicts pods that lack the toleration). Note that a toleration only *permits* a pod onto a tainted node — it doesn't *attract* it there, which is why taints and node affinity are often used together.
+
+Finally, **priority and preemption** handle the "who wins when the cluster is full" question. Each pod can carry a PriorityClass, and when a high-priority pod can't fit, the scheduler will evict lower-priority pods to make room (preemption). This guarantees that critical production workloads aren't blocked by disposable batch jobs. Together, these mechanisms turn scheduling from "wherever it fits" into a deliberate expression of your performance, availability, and business-priority requirements.
+
+---
+
 ## 🎯 Node Affinity
 
 ### What is Node Affinity?
@@ -308,6 +322,23 @@ spec:
 | Tolerations | Pod | "I can handle that taint" |
 | Priority | Pod | "I'm more important, don't evict me" |
 | Preemption | Pod | "Evict others if needed to make room for me" |
+
+---
+
+## 🎯 Interview Quick Points
+
+- Advanced scheduling controls **where pods land** instead of leaving it to the default scheduler
+- **Node affinity** = pod prefers/requires specific node types (labels like disk-type, zone, instance-type)
+- **Pod affinity** = co-locate pods (low latency); **pod anti-affinity** = spread pods apart (high availability)
+- Every rule is **required** (hard, pod stays Pending if unmet) or **preferred** (soft, weighted best-effort)
+- `IgnoredDuringExecution` means rules apply at scheduling time only — running pods aren't evicted if labels change later
+- **Taints** are on nodes ("keep out"); **tolerations** are on pods ("I have a pass")
+- Taint effects: **NoSchedule** (block new), **PreferNoSchedule** (soft), **NoExecute** (block new + evict existing)
+- A toleration only *permits* a pod onto a tainted node; use node affinity to actively *attract* it there
+- **topologyKey** defines the boundary: `kubernetes.io/hostname` = per-node, `topology.kubernetes.io/zone` = per-zone
+- **PriorityClass** + **preemption** let critical pods evict lower-priority ones when the cluster is full
+- Common combo: taint GPU nodes + add tolerations + node affinity so only GPU workloads run there
+- Anti-affinity across replicas is a key pattern for surviving single-node failures
 
 ---
 

@@ -1,5 +1,19 @@
 # Module 10: Terraform Best Practices
 
+## 📖 Understanding Terraform Best Practices (Intuition First)
+
+Terraform best practices are less about arbitrary rules and more about applying the hard-won lessons of software engineering to infrastructure. Once your infrastructure *is* code, it inherits all the ways code can rot: it can become a tangled mess nobody dares touch, it can hide secrets in plain sight, and one careless change can take down production. Best practices are the guardrails that keep infrastructure-as-code readable, safe, and maintainable as it grows and as more people touch it.
+
+Think of it like keeping a professional kitchen. A clean, well-organized kitchen — labeled containers, tools in consistent places, ingredients separated — lets any cook step in and work safely and fast. A chaotic one leads to mistakes, cross-contamination, and accidents. Consistent project structure, clear naming, and separated files are that organization: they let a new teammate open your repo and immediately understand what's where, instead of spelunking through one giant `everything.tf`.
+
+The biggest theme running through these practices is **reducing blast radius**. Separating environments into their own state, splitting large configurations into smaller components, and always running `plan` before `apply` all exist so that a mistake is contained and previewable rather than catastrophic. You want the smallest possible thing to break when something goes wrong, and you want to see the damage *before* it happens.
+
+Another core theme is **treating secrets and state as dangerous by default**. State files and hardcoded passwords are the two most common ways Terraform projects leak credentials. So the practices push you toward secrets managers, `sensitive` flags, remote encrypted state, and disciplined `.gitignore` files. The assumption is that anything committed to Git will eventually be seen by someone who shouldn't see it.
+
+Finally, many practices are about **making the machine enforce quality instead of relying on human memory**: `terraform fmt` and `validate` in CI, pinned versions for reproducibility, and documented modules with clear inputs and outputs. Automating these checks means good habits happen every time, not just when someone remembers. The payoff is infrastructure you can change confidently for years, not a fragile artifact everyone is afraid to touch.
+
+---
+
 ## Project Structure
 
 ### Recommended Structure
@@ -812,6 +826,21 @@ Before committing code:
 ✅ Validate and format code automatically
 
 ---
+
+## 🎯 Interview Quick Points
+
+- Use a **consistent project structure** (environments/, modules/) and separate files by concern
+- Follow **`snake_case`** naming; be descriptive; prefix booleans with `enable_`/`is_`/`has_`
+- Enforce quality automatically: **`terraform fmt` and `terraform validate` in CI/CD**
+- **Separate state per environment** to shrink blast radius (dev can't break prod)
+- Use **remote state with locking and encryption** for any team/production work
+- **Never hardcode secrets** — use Secrets Manager/SSM, `sensitive = true`, or env vars
+- **Never commit** state files or secret `.tfvars` to Git
+- **Pin provider versions** (`~> 5.0`) and set `required_version` for reproducibility
+- **Always `plan` before `apply`**; save the plan (`-out`) and apply that exact plan in CI
+- Keep **modules focused, versioned, and documented** with input/output tables
+- Apply a **consistent tagging strategy** (via `default_tags` or `locals` + `merge`)
+- Split large configs into components (network/compute/database) and use `-target`/`-parallelism` when needed
 
 ## Next Steps
 

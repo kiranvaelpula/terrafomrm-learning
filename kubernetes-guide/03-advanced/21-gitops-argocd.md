@@ -1,5 +1,17 @@
 # Module 21: GitOps with ArgoCD
 
+## Understanding GitOps and ArgoCD (Intuition First)
+
+Most teams deploy by running kubectl apply from a laptop or a CI pipeline that pushes changes into the cluster. The problem: the cluster's actual state slowly drifts from any written-down source. Who changed that replica count? Was that hotfix ever committed? GitOps fixes this by making a Git repository the single source of truth for what your cluster should look like.
+
+The core idea is a shift from push to pull. Instead of pushing changes into the cluster, an agent living inside the cluster (ArgoCD) continuously pulls from Git and reconciles the cluster to match what's declared. You deploy by committing to Git; the agent applies it. Every change is a reviewed commit with a full audit trail.
+
+This gives two properties operators love. Drift detection and self-healing: ArgoCD compares live state against Git and reverts manual changes back to the declared state. And trivial rollback: since every version is a Git commit, rolling back is just reverting a commit.
+
+ArgoCD's central object is the Application, linking a source (repo, path, revision) to a destination (cluster, namespace). Its sync policy can be manual (approve) or automated, with prune (delete resources removed from Git) and selfHeal (undo drift).
+
+At scale, the App of Apps pattern uses one root Application to manage many child Applications, and one ArgoCD can target dev, staging, and prod from the same repo. The mental model: describe desired state in Git, let an in-cluster agent make reality match it - continuously and auditably.
+
 ## 🎯 Install ArgoCD
 
 ```bash
@@ -225,3 +237,18 @@ argocd app wait myapp --health
 ```
 
 ## ⏭️ Next: [Module 22: Multi-Cluster Management](./22-multi-cluster.md)
+
+## Interview Quick Points
+
+- GitOps = Git is the single source of truth for cluster/app desired state
+- Shift from push (kubectl apply) to pull (an in-cluster agent syncs from Git)
+- You deploy by committing to Git, not by running commands - full audit trail via PRs
+- ArgoCD's core object is the Application (source repo/path/revision to destination cluster/namespace)
+- Drift detection + self-healing: ArgoCD reverts manual changes back to the Git-declared state
+- Rollback = revert a Git commit - no special tooling needed
+- Sync policies: manual (approve) vs automated; prune (delete removed resources) and selfHeal (undo drift)
+- App of Apps pattern: one root Application manages many child Applications
+- One ArgoCD can deploy to multiple clusters (dev/staging/prod) from one repo
+- Supports plain manifests, Helm, and Kustomize as sources
+- Benefits: consistency, auditability, easy rollback, no config drift
+- Flux is a comparable CNCF GitOps alternative to ArgoCD
